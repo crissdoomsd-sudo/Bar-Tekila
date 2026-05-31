@@ -1,1 +1,1223 @@
-fire
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bar Tekila & Asociados - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tek: {
+                            50: '#fef9f0', 100: '#f5e6c8', 200: '#e8cc8e', 300: '#d4a017',
+                            400: '#c4910f', 500: '#a67800', 600: '#8b6508', 700: '#6d4c00',
+                            800: '#4a3300', 900: '#2d1b0a', 950: '#1a0f06',
+                        }
+                    },
+                    fontFamily: { cinzel: ['Cinzel','serif'], poppins: ['Poppins','sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --gold: #d4a017; --gold-light: #f0c040; --cream: #f5e6c8;
+            --dark: #0d0906; --dark2: #1a0f06; --dark3: #241810;
+            --brown: #3d2a1a; --red: #b22222;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--dark); color: var(--cream); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--dark2); }
+        ::-webkit-scrollbar-thumb { background: var(--brown); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+        /* Burbujas de fondo */
+        .bubble {
+            position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(212,160,23,0.08), transparent 70%);
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; } 85% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+        .glow-orb {
+            position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+            filter: blur(80px); opacity: 0.15;
+        }
+
+        /* Tarjetas de miembros */
+        .member-card {
+            background: linear-gradient(145deg, #1f1410, #2a1a10);
+            border: 1px solid rgba(212,160,23,0.12);
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .member-card:hover {
+            border-color: rgba(212,160,23,0.4);
+            box-shadow: 0 8px 40px rgba(212,160,23,0.12);
+            transform: translateY(-6px);
+        }
+        .member-card .card-actions { opacity: 0; transition: opacity 0.3s; }
+        .member-card:hover .card-actions { opacity: 1; }
+
+        /* Stat cards */
+        .stat-card {
+            background: rgba(45,27,16,0.5); backdrop-filter: blur(12px);
+            border: 1px solid rgba(212,160,23,0.15); transition: all 0.3s;
+        }
+        .stat-card:hover { border-color: rgba(212,160,23,0.35); transform: translateY(-2px); }
+
+        /* Modales */
+        .modal-overlay {
+            opacity: 0; pointer-events: none; transition: opacity 0.35s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-overlay .modal-box {
+            transform: translateY(30px) scale(0.95); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        .modal-overlay.active .modal-box { transform: translateY(0) scale(1); }
+
+        /* Toast */
+        .toast {
+            animation: toastIn 0.4s ease-out, toastOut 0.4s ease-in forwards;
+            animation-delay: 0s, 3s;
+        }
+        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(50%); } }
+
+        /* Botón principal */
+        .btn-gold {
+            background: linear-gradient(135deg, #d4a017, #b8860b);
+            color: #1a0f06; font-weight: 600; transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(212,160,23,0.25);
+        }
+        .btn-gold:hover { box-shadow: 0 6px 25px rgba(212,160,23,0.4); transform: translateY(-1px); }
+        .btn-gold:active { transform: translateY(0); }
+
+        /* CARNET ESTILOS */
+        .carnet-wrapper {
+            width: 560px; height: 350px; position: relative;
+            font-family: 'Poppins', sans-serif; overflow: hidden;
+        }
+        .carnet-bg {
+            position: absolute; inset: 0;
+            background:
+                repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(139,101,8,0.03) 12px, rgba(139,101,8,0.03) 13px),
+                repeating-linear-gradient(-45deg, transparent, transparent 12px, rgba(139,101,8,0.03) 12px, rgba(139,101,8,0.03) 13px),
+                linear-gradient(170deg, #f7ecd5 0%, #f0dfc0 40%, #e8d5a8 100%);
+        }
+        .carnet-border-outer {
+            position: absolute; inset: 0; border: 3px solid #6d4c00; border-radius: 12px;
+        }
+        .carnet-border-inner {
+            position: absolute; inset: 6px; border: 1.5px solid #8b6508; border-radius: 8px;
+        }
+        .carnet-corner {
+            position: absolute; width: 18px; height: 18px;
+            border-color: #6d4c00; border-style: solid;
+        }
+        .carnet-corner.tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
+        .carnet-corner.tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
+        .carnet-corner.bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
+        .carnet-corner.br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+
+        .carnet-header-bar {
+            position: absolute; top: 14px; left: 14px; right: 14px; height: 70px;
+            background: linear-gradient(135deg, #5c3d00, #7a5200, #5c3d00);
+            border-radius: 6px; display: flex; align-items: center; padding: 0 16px; gap: 12px;
+        }
+        .carnet-header-bar .logo-img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #d4a017; }
+        .carnet-header-bar .header-text { color: #f5e6c8; }
+        .carnet-header-bar .header-title { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; letter-spacing: 2px; }
+        .carnet-header-bar .header-sub { font-size: 9px; letter-spacing: 3px; opacity: 0.8; margin-top: 2px; }
+
+        .carnet-doc-title {
+            position: absolute; top: 90px; left: 0; right: 0; text-align: center;
+            font-family: 'Cinzel', serif; font-size: 16px; font-weight: 900;
+            color: #6d4c00; letter-spacing: 4px;
+        }
+
+        .carnet-body { position: absolute; top: 118px; left: 24px; right: 24px; bottom: 60px; display: flex; gap: 20px; }
+        .carnet-photo-frame {
+            width: 110px; height: 130px; flex-shrink: 0;
+            border: 2px solid #6d4c00; background: #e8d5a8; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .carnet-photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+        .carnet-photo-frame .no-photo { color: #8b6508; font-size: 40px; }
+
+        .carnet-info { flex: 1; display: flex; flex-direction: column; gap: 4px; padding-top: 2px; }
+        .carnet-field { display: flex; gap: 6px; align-items: baseline; }
+        .carnet-label { font-size: 9px; color: #8b6508; text-transform: uppercase; letter-spacing: 1px; min-width: 85px; font-weight: 600; }
+        .carnet-value { font-size: 12px; color: #2d1b0a; font-weight: 700; text-transform: uppercase; }
+
+        .carnet-footer {
+            position: absolute; bottom: 14px; left: 24px; right: 24px; height: 40px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .carnet-stamp {
+            width: 52px; height: 52px; border: 2.5px solid rgba(178,34,34,0.55);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            transform: rotate(-12deg); position: relative; opacity: 0.7;
+        }
+        .carnet-stamp::before {
+            content: ''; position: absolute; inset: 3px; border: 1.5px solid rgba(178,34,34,0.35);
+            border-radius: 50%;
+        }
+        .carnet-stamp-inner { text-align: center; color: rgba(178,34,34,0.7); font-size: 7px; font-weight: 700; line-height: 1.1; letter-spacing: 0.5px; }
+        .carnet-stamp-star { font-size: 14px; color: rgba(178,34,34,0.6); }
+
+        .carnet-number { font-family: 'Cinzel', serif; font-size: 11px; color: #6d4c00; font-weight: 700; letter-spacing: 2px; }
+        .carnet-validity { font-size: 7px; color: #8b6508; text-align: right; line-height: 1.3; }
+
+        /* Watermark */
+        .carnet-watermark {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-30deg);
+            font-family: 'Cinzel', serif; font-size: 60px; font-weight: 900;
+            color: rgba(139,101,8,0.04); letter-spacing: 10px; pointer-events: none; white-space: nowrap;
+        }
+
+        /* Input file custom */
+        .photo-upload-zone {
+            border: 2px dashed rgba(212,160,23,0.3); border-radius: 12px;
+            transition: all 0.3s; cursor: pointer;
+        }
+        .photo-upload-zone:hover { border-color: rgba(212,160,23,0.6); background: rgba(212,160,23,0.05); }
+        .photo-upload-zone.has-photo { border-style: solid; border-color: rgba(212,160,23,0.4); }
+
+        /* Animación de entrada */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+
+        /* Pulse del status */
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .status-dot.activo { background: #27ae60; box-shadow: 0 0 6px rgba(39,174,96,0.5); }
+        .status-dot.leyenda { background: #d4a017; box-shadow: 0 0 6px rgba(212,160,23,0.5); }
+        .status-dot.rehab { background: #e67e22; box-shadow: 0 0 6px rgba(230,126,34,0.5); }
+        .status-dot.probation { background: #e74c3c; box-shadow: 0 0 6px rgba(231,76,60,0.5); }
+        .status-dot.inactivo { background: #7f8c8d; }
+
+        @media (max-width: 768px) {
+            .carnet-wrapper { width: 360px; height: 226px; }
+            .carnet-header-bar { height: 50px; padding: 0 10px; }
+            .carnet-header-bar .logo-img { width: 34px; height: 34px; }
+            .carnet-header-bar .header-title { font-size: 10px; }
+            .carnet-doc-title { font-size: 11px; top: 70px; }
+            .carnet-body { top: 90px; left: 16px; right: 16px; bottom: 44px; gap: 12px; }
+            .carnet-photo-frame { width: 70px; height: 85px; }
+            .carnet-label { font-size: 7px; min-width: 60px; }
+            .carnet-value { font-size: 9px; }
+            .carnet-footer { bottom: 10px; left: 16px; right: 16px; }
+            .carnet-stamp { width: 36px; height: 36px; }
+        }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden">
+
+    <!-- Efectos de fondo -->
+    <div class="glow-orb" style="width:400px;height:400px;background:#d4a017;top:-100px;right:-100px;"></div>
+    <div class="glow-orb" style="width:300px;height:300px;background:#8b6508;bottom:-80px;left:-80px;"></div>
+    <div id="bubbles-container"></div>
+
+    <!-- Toasts -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2"></div>
+
+    <!-- HEADER -->
+    <header class="relative z-10 border-b border-tek-800/50" style="background:rgba(13,9,6,0.85);backdrop-filter:blur(16px);">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-4">
+                <img src="https://z-cdn-media.chatglm.cn/files/7fcd03b8-845f-4d3c-9e71-bd45da3bc624.png?auth_key=1880211554-91d107a239fe4f279164685a00931530-0-a0c541bc508b4ae0960378c33835743ac"
+                     alt="Bar Tekila" class="w-14 h-14 rounded-full border-2 border-tek-300 shadow-lg shadow-tek-300/20 object-cover"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                <div class="w-14 h-14 rounded-full border-2 border-tek-300 bg-tek-800 items-center justify-center text-tek-300 font-cinzel font-bold text-lg hidden">BT</div>
+                <div>
+                    <h1 class="font-cinzel font-bold text-xl md:text-2xl text-tek-100 tracking-wider">BAR TEKILA</h1>
+                    <p class="text-tek-300 text-xs tracking-[4px] font-cinzel">& ASOCIADOS</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="openFirebaseModal()" class="px-3 py-2 rounded-lg border border-tek-700 text-tek-200 text-sm hover:border-tek-300 hover:text-tek-100 transition-all" title="Configurar Firebase">
+                    <i class="fas fa-database mr-1"></i> <span class="hidden sm:inline">Firebase</span>
+                </button>
+                <button onclick="openMemberModal()" class="btn-gold px-5 py-2.5 rounded-lg text-sm flex items-center gap-2">
+                    <i class="fas fa-user-plus"></i> Nuevo Integrante
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="relative z-10 max-w-7xl mx-auto px-4 py-8">
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="stat-card rounded-xl p-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-tek-300/10 flex items-center justify-center text-tek-300"><i class="fas fa-users"></i></div>
+                    <div>
+                        <p class="text-tek-400 text-xs uppercase tracking-wider">Total</p>
+                        <p id="stat-total" class="text-2xl font-bold text-tek-100">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card rounded-xl p-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400"><i class="fas fa-check-circle"></i></div>
+                    <div>
+                        <p class="text-tek-400 text-xs uppercase tracking-wider">Activos</p>
+                        <p id="stat-activos" class="text-2xl font-bold text-tek-100">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card rounded-xl p-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400"><i class="fas fa-heart-pulse"></i></div>
+                    <div>
+                        <p class="text-tek-400 text-xs uppercase tracking-wider">En Rehab</p>
+                        <p id="stat-rehab" class="text-2xl font-bold text-tek-100">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card rounded-xl p-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-tek-300/10 flex items-center justify-center text-tek-300"><i class="fas fa-crown"></i></div>
+                    <div>
+                        <p class="text-tek-400 text-xs uppercase tracking-wider">Leyendas</p>
+                        <p id="stat-leyendas" class="text-2xl font-bold text-tek-100">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de búsqueda y filtros -->
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+            <div class="flex-1 min-w-[200px] relative">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-tek-500"></i>
+                <input id="search-input" type="text" placeholder="Buscar integrante..."
+                    class="w-full bg-tek-900/60 border border-tek-700/50 rounded-lg pl-10 pr-4 py-2.5 text-tek-100 placeholder:text-tek-600 focus:outline-none focus:border-tek-300/50 text-sm transition-colors"
+                    oninput="renderMembers()">
+            </div>
+            <select id="filter-status" onchange="renderMembers()"
+                class="bg-tek-900/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 text-sm focus:outline-none focus:border-tek-300/50 cursor-pointer">
+                <option value="">Todos los estados</option>
+                <option value="Activo">Activo</option>
+                <option value="En Rehabilitación">En Rehabilitación</option>
+                <option value="Probation">Probation</option>
+                <option value="Leyenda">Leyenda</option>
+                <option value="Inactivo">Inactivo</option>
+            </select>
+        </div>
+
+        <!-- Grid de miembros -->
+        <div id="members-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        </div>
+
+        <!-- Estado vacío -->
+        <div id="empty-state" class="hidden text-center py-20">
+            <i class="fas fa-glass-cheers text-6xl text-tek-700 mb-4"></i>
+            <p class="text-tek-400 text-lg font-cinzel">Aun no hay integrantes</p>
+            <p class="text-tek-600 text-sm mt-1">Registra al primer miembro del grupo</p>
+            <button onclick="openMemberModal()" class="btn-gold mt-6 px-6 py-2.5 rounded-lg text-sm inline-flex items-center gap-2">
+                <i class="fas fa-user-plus"></i> Registrar Integrante
+            </button>
+        </div>
+    </main>
+
+    <!-- MODAL: Agregar/Editar Integrante -->
+    <div id="member-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.7);">
+        <div class="modal-box w-full max-w-lg rounded-2xl border border-tek-700/50 overflow-hidden" style="background:linear-gradient(160deg,#1f1410,#2a1a10);">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-tek-700/40">
+                <h2 id="modal-title" class="font-cinzel font-bold text-lg text-tek-100">Nuevo Integrante</h2>
+                <button onclick="closeMemberModal()" class="text-tek-400 hover:text-tek-100 transition-colors text-xl"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="member-form" onsubmit="handleMemberSubmit(event)" class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                <input type="hidden" id="member-id">
+
+                <!-- Foto -->
+                <div>
+                    <label class="text-tek-300 text-sm font-medium mb-2 block">Fotografia</label>
+                    <div id="photo-zone" class="photo-upload-zone p-6 flex flex-col items-center gap-2" onclick="document.getElementById('photo-input').click()">
+                        <div id="photo-preview-container" class="w-24 h-24 rounded-full overflow-hidden border-2 border-tek-600 bg-tek-900 flex items-center justify-center">
+                            <i id="photo-icon" class="fas fa-camera text-2xl text-tek-500"></i>
+                            <img id="photo-preview" class="w-full h-full object-cover hidden" alt="">
+                        </div>
+                        <p class="text-tek-500 text-xs">Click para subir foto</p>
+                    </div>
+                    <input type="file" id="photo-input" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+                </div>
+
+                <!-- Nombre -->
+                <div>
+                    <label class="text-tek-300 text-sm font-medium mb-1 block">Nombre Completo *</label>
+                    <input type="text" id="inp-nombre" required
+                        class="w-full bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 placeholder:text-tek-600 focus:outline-none focus:border-tek-300/50 text-sm"
+                        placeholder="Ej: Cristian Medina">
+                </div>
+
+                <!-- Apodo -->
+                <div>
+                    <label class="text-tek-300 text-sm font-medium mb-1 block">Apodo</label>
+                    <input type="text" id="inp-apodo"
+                        class="w-full bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 placeholder:text-tek-600 focus:outline-none focus:border-tek-300/50 text-sm"
+                        placeholder="Ej: El Jefe">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Sexo -->
+                    <div>
+                        <label class="text-tek-300 text-sm font-medium mb-1 block">Sexo</label>
+                        <select id="inp-sexo"
+                            class="w-full bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 text-sm focus:outline-none focus:border-tek-300/50 cursor-pointer">
+                            <option value="Por Favor">Por Favor</option>
+                            <option value="Si Por Favor">Si Por Favor</option>
+                            <option value="Macho Alfa">Macho Alfa</option>
+                            <option value="Dama de Honor">Dama de Honor</option>
+                            <option value="Sin Especificar">Sin Especificar</option>
+                            <option value="Todos los Dias">Todos los Dias</option>
+                        </select>
+                    </div>
+                    <!-- Estado -->
+                    <div>
+                        <label class="text-tek-300 text-sm font-medium mb-1 block">Estado</label>
+                        <select id="inp-estado"
+                            class="w-full bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 text-sm focus:outline-none focus:border-tek-300/50 cursor-pointer">
+                            <option value="Activo">Activo</option>
+                            <option value="En Rehabilitación">En Rehabilitación</option>
+                            <option value="Probation">Probation</option>
+                            <option value="Leyenda">Leyenda</option>
+                            <option value="Inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Especialidad -->
+                <div>
+                    <label class="text-tek-300 text-sm font-medium mb-1 block">Especialidad</label>
+                    <div class="flex gap-2">
+                        <select id="inp-especialidad-preset"
+                            class="flex-1 bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 text-sm focus:outline-none focus:border-tek-300/50 cursor-pointer"
+                            onchange="if(this.value!=='custom'){document.getElementById('inp-especialidad-custom').value='';}">
+                            <option value="Tomar hasta beber">Tomar hasta beber</option>
+                            <option value="Catador Oficial">Catador Oficial</option>
+                            <option value="Filosofo del Bar">Filosofo del Bar</option>
+                            <option value="Cantinero Amateur">Cantinero Amateur</option>
+                            <option value="Sobreviviente">Sobreviviente</option>
+                            <option value="Creador de Caos">Creador de Caos</option>
+                            <option value="Paz Social">Paz Social</option>
+                            <option value="Animador Oficial">Animador Oficial</option>
+                            <option value="El que siempre paga">El que siempre paga</option>
+                            <option value="La que nunca toma">La que nunca toma</option>
+                            <option value="custom">Personalizado...</option>
+                        </select>
+                    </div>
+                    <input type="text" id="inp-especialidad-custom"
+                        class="w-full mt-2 bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 placeholder:text-tek-600 focus:outline-none focus:border-tek-300/50 text-sm hidden"
+                        placeholder="Escribe tu especialidad...">
+                </div>
+
+                <!-- Fecha de ingreso -->
+                <div>
+                    <label class="text-tek-300 text-sm font-medium mb-1 block">Fecha de Ingreso</label>
+                    <input type="date" id="inp-fecha"
+                        class="w-full bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 text-sm focus:outline-none focus:border-tek-300/50 cursor-pointer">
+                </div>
+
+                <!-- Cita favorita -->
+                <div>
+                    <label class="text-tek-300 text-sm font-medium mb-1 block">Cita Favorita</label>
+                    <input type="text" id="inp-cita"
+                        class="w-full bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 placeholder:text-tek-600 focus:outline-none focus:border-tek-300/50 text-sm"
+                        placeholder="Ej: Yo no bebo, solo cata">
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeMemberModal()" class="flex-1 px-4 py-2.5 rounded-lg border border-tek-700 text-tek-300 hover:bg-tek-800 transition-colors text-sm">Cancelar</button>
+                    <button type="submit" class="flex-1 btn-gold px-4 py-2.5 rounded-lg text-sm">
+                        <i class="fas fa-save mr-1"></i> <span id="btn-submit-text">Guardar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Carnet Preview -->
+    <div id="carnet-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.8);">
+        <div class="modal-box flex flex-col items-center gap-6 max-w-[620px] w-full">
+            <!-- Carnet -->
+            <div class="rounded-2xl overflow-hidden shadow-2xl shadow-tek-300/10">
+                <div id="carnet-render" class="carnet-wrapper">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+            <!-- Acciones -->
+            <div class="flex gap-3 flex-wrap justify-center">
+                <button onclick="downloadCarnetPNG()" class="btn-gold px-6 py-2.5 rounded-lg text-sm flex items-center gap-2">
+                    <i class="fas fa-download"></i> Descargar PNG
+                </button>
+                <button onclick="closeCarnetModal()" class="px-6 py-2.5 rounded-lg border border-tek-600 text-tek-200 hover:bg-tek-800 transition-colors text-sm">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Firebase Config -->
+    <div id="firebase-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.7);">
+        <div class="modal-box w-full max-w-lg rounded-2xl border border-tek-700/50 overflow-hidden" style="background:linear-gradient(160deg,#1f1410,#2a1a10);">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-tek-700/40">
+                <h2 class="font-cinzel font-bold text-lg text-tek-100">Configurar Firebase</h2>
+                <button onclick="closeFirebaseModal()" class="text-tek-400 hover:text-tek-100 transition-colors text-xl"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-tek-400 text-sm">Ingresa tu configuracion de Firebase Firestore para sincronizar los datos. Sin configurar, la app usa almacenamiento local.</p>
+                <div id="firebase-status" class="px-3 py-2 rounded-lg text-sm"></div>
+                <div>
+                    <label class="text-tek-300 text-sm font-medium mb-1 block">API Key</label>
+                    <input type="text" id="fb-apiKey" class="w-full bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 text-sm focus:outline-none focus:border-tek-300/50" placeholder="AIza...">
+                </div>
+                <div>
+                    <label class="text-tek-300 text-sm font-medium mb-1 block">Auth Domain</label>
+                    <input type="text" id="fb-authDomain" class="w-full bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 text-sm focus:outline-none focus:border-tek-300/50" placeholder="tu-proyecto.firebaseapp.com">
+                </div>
+                <div>
+                    <label class="text-tek-300 text-sm font-medium mb-1 block">Project ID</label>
+                    <input type="text" id="fb-projectId" class="w-full bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 text-sm focus:outline-none focus:border-tek-300/50" placeholder="tu-proyecto-id">
+                </div>
+                <div>
+                    <label class="text-tek-300 text-sm font-medium mb-1 block">Storage Bucket</label>
+                    <input type="text" id="fb-storageBucket" class="w-full bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 text-sm focus:outline-none focus:border-tek-300/50" placeholder="tu-proyecto.appspot.com">
+                </div>
+                <div>
+                    <label class="text-tek-300 text-sm font-medium mb-1 block">App ID</label>
+                    <input type="text" id="fb-appId" class="w-full bg-tek-950/60 border border-tek-700/50 rounded-lg px-4 py-2.5 text-tek-100 text-sm focus:outline-none focus:border-tek-300/50" placeholder="1:123:web:abc">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="disconnectFirebase()" class="px-4 py-2.5 rounded-lg border border-red-800 text-red-400 hover:bg-red-900/30 transition-colors text-sm">Desconectar</button>
+                    <div class="flex-1"></div>
+                    <button onclick="closeFirebaseModal()" class="px-4 py-2.5 rounded-lg border border-tek-700 text-tek-300 hover:bg-tek-800 transition-colors text-sm">Cancelar</button>
+                    <button onclick="connectFirebase()" class="btn-gold px-5 py-2.5 rounded-lg text-sm"><i class="fas fa-plug mr-1"></i> Conectar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Confirmar eliminación -->
+    <div id="delete-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.7);">
+        <div class="modal-box w-full max-w-sm rounded-2xl border border-tek-700/50 p-6 text-center" style="background:linear-gradient(160deg,#1f1410,#2a1a10);">
+            <div class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-2xl text-red-400"></i>
+            </div>
+            <h3 class="font-cinzel font-bold text-lg text-tek-100 mb-2">Expulsar Integrante</h3>
+            <p class="text-tek-400 text-sm mb-6">Estas seguro de eliminar a <strong id="delete-name" class="text-tek-200"></strong>? Esta accion no se puede deshacer.</p>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2.5 rounded-lg border border-tek-700 text-tek-300 hover:bg-tek-800 transition-colors text-sm">Cancelar</button>
+                <button onclick="confirmDelete()" class="flex-1 px-4 py-2.5 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors text-sm">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// =====================================================
+// BAR TEKILA & ASOCIADOS - DASHBOARD
+// =====================================================
+
+// --- Configuración ---
+const LOGO_URL = 'https://z-cdn-media.chatglm.cn/files/7fcd03b8-845f-4d3c-9e71-bd45da3bc624.png?auth_key=1880211554-91d107a239fe4f279164685a00931530-0-a0c541bc508b4ae0960378c33835743ac';
+const STORAGE_KEY = 'bartekila_members';
+const FIREBASE_CONFIG_KEY = 'bartekila_firebase_config';
+
+// --- Estado global ---
+let members = [];
+let currentCarnetMember = null;
+let deleteTargetId = null;
+let firebaseEnabled = false;
+let db = null;
+let tempPhotoData = null;
+
+// --- Utilidades ---
+function genId() {
+    return 'bt_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+}
+
+function getNextNumero() {
+    if (members.length === 0) return 'BT-001';
+    const nums = members.map(m => {
+        const n = parseInt((m.numeroSocio || '').replace('BT-', ''), 10);
+        return isNaN(n) ? 0 : n;
+    });
+    const max = Math.max(...nums, 0);
+    return 'BT-' + String(max + 1).padStart(3, '0');
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return new Date().toLocaleDateString('es-BO');
+    const d = new Date(dateStr + 'T12:00:00');
+    return d.toLocaleDateString('es-BO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function getStatusClass(estado) {
+    const map = { 'Activo': 'activo', 'Leyenda': 'leyenda', 'En Rehabilitación': 'rehab', 'Probation': 'probation', 'Inactivo': 'inactivo' };
+    return map[estado] || 'inactivo';
+}
+
+// --- Almacenamiento local ---
+function saveToLocal() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(members)); } catch (e) { console.warn('Error guardando:', e); }
+}
+
+function loadFromLocal() {
+    try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        members = data ? JSON.parse(data) : [];
+    } catch (e) { members = []; }
+}
+
+// --- Firebase ---
+function loadFirebaseConfig() {
+    try {
+        const raw = localStorage.getItem(FIREBASE_CONFIG_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+}
+
+function saveFirebaseConfig(config) {
+    localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(config));
+}
+
+function initFirebase(config) {
+    try {
+        if (firebase.apps.length) { firebase.app().delete().then(() => startFirebase(config)); }
+        else { startFirebase(config); }
+    } catch (e) { console.error('Firebase init error:', e); firebaseEnabled = false; }
+}
+
+function startFirebase(config) {
+    try {
+        const app = firebase.initializeApp(config);
+        db = firebase.firestore();
+        firebaseEnabled = true;
+        // Escuchar cambios en tiempo real
+        db.collection('members').onSnapshot(snapshot => {
+            members = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderAll();
+        }, err => {
+            console.error('Firebase snapshot error:', err);
+            showToast('Error de conexion Firebase', 'error');
+        });
+        showToast('Firebase conectado', 'success');
+    } catch (e) {
+        console.error('Firebase start error:', e);
+        firebaseEnabled = false;
+        showToast('Error al conectar Firebase', 'error');
+    }
+}
+
+function disconnectFirebase() {
+    firebaseEnabled = false;
+    db = null;
+    localStorage.removeItem(FIREBASE_CONFIG_KEY);
+    if (firebase.apps.length) {
+        firebase.app().delete().catch(() => {});
+    }
+    loadFromLocal();
+    renderAll();
+    updateFirebaseStatus();
+    showToast('Firebase desconectado, usando almacenamiento local', 'info');
+    closeFirebaseModal();
+}
+
+async function saveMemberToFirebase(member) {
+    if (!firebaseEnabled || !db) return;
+    try {
+        if (member.id.startsWith('bt_')) {
+            // Nuevo documento
+            const docRef = await db.collection('members').add({ ...member });
+            return docRef.id;
+        } else {
+            // Actualizar existente
+            await db.collection('members').doc(member.id).set({ ...member });
+            return member.id;
+        }
+    } catch (e) { console.error('Firebase save error:', e); throw e; }
+}
+
+async function deleteMemberFromFirebase(id) {
+    if (!firebaseEnabled || !db) return;
+    try { await db.collection('members').doc(id).delete(); } catch (e) { console.error('Firebase delete error:', e); throw e; }
+}
+
+function connectFirebase() {
+    const config = {
+        apiKey: document.getElementById('fb-apiKey').value.trim(),
+        authDomain: document.getElementById('fb-authDomain').value.trim(),
+        projectId: document.getElementById('fb-projectId').value.trim(),
+        storageBucket: document.getElementById('fb-storageBucket').value.trim(),
+        appId: document.getElementById('fb-appId').value.trim(),
+    };
+    if (!config.apiKey || !config.projectId) {
+        showToast('API Key y Project ID son obligatorios', 'error');
+        return;
+    }
+    saveFirebaseConfig(config);
+    initFirebase(config);
+    closeFirebaseModal();
+}
+
+function updateFirebaseStatus() {
+    const el = document.getElementById('firebase-status');
+    if (firebaseEnabled) {
+        el.className = 'px-3 py-2 rounded-lg text-sm bg-green-500/10 text-green-400 border border-green-500/20';
+        el.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Firebase conectado y sincronizado';
+    } else {
+        el.className = 'px-3 py-2 rounded-lg text-sm bg-tek-800/50 text-tek-400 border border-tek-700/30';
+        el.innerHTML = '<i class="fas fa-database mr-1"></i> Usando almacenamiento local';
+    }
+}
+
+// --- CRUD Miembros ---
+async function addMember(data) {
+    const member = {
+        id: genId(),
+        numeroSocio: getNextNumero(),
+        nombre: data.nombre,
+        apodo: data.apodo || '',
+        sexo: data.sexo || 'Por Favor',
+        especialidad: data.especialidad || 'Tomar hasta beber',
+        estado: data.estado || 'Activo',
+        fechaIngreso: data.fechaIngreso || new Date().toISOString().split('T')[0],
+        cita: data.cita || '',
+        foto: data.foto || null,
+        creadoEn: new Date().toISOString(),
+    };
+    if (firebaseEnabled) {
+        await saveMemberToFirebase(member);
+    } else {
+        members.push(member);
+        saveToLocal();
+    }
+    renderAll();
+    return member;
+}
+
+async function updateMember(id, data) {
+    if (firebaseEnabled) {
+        const existing = members.find(m => m.id === id);
+        const updated = { ...existing, ...data, actualizadoEn: new Date().toISOString() };
+        await saveMemberToFirebase(updated);
+    } else {
+        const idx = members.findIndex(m => m.id === id);
+        if (idx >= 0) { members[idx] = { ...members[idx], ...data, actualizadoEn: new Date().toISOString() }; saveToLocal(); }
+    }
+    renderAll();
+}
+
+async function deleteMember(id) {
+    if (firebaseEnabled) {
+        await deleteMemberFromFirebase(id);
+    } else {
+        members = members.filter(m => m.id !== id);
+        saveToLocal();
+    }
+    renderAll();
+}
+
+// --- Renderizado ---
+function renderAll() {
+    renderStats();
+    renderMembers();
+}
+
+function renderStats() {
+    document.getElementById('stat-total').textContent = members.length;
+    document.getElementById('stat-activos').textContent = members.filter(m => m.estado === 'Activo').length;
+    document.getElementById('stat-rehab').textContent = members.filter(m => m.estado === 'En Rehabilitación').length;
+    document.getElementById('stat-leyendas').textContent = members.filter(m => m.estado === 'Leyenda').length;
+}
+
+function renderMembers() {
+    const grid = document.getElementById('members-grid');
+    const emptyState = document.getElementById('empty-state');
+    const query = document.getElementById('search-input').value.toLowerCase().trim();
+    const statusFilter = document.getElementById('filter-status').value;
+
+    let filtered = members.filter(m => {
+        const matchSearch = !query ||
+            (m.nombre || '').toLowerCase().includes(query) ||
+            (m.apodo || '').toLowerCase().includes(query) ||
+            (m.especialidad || '').toLowerCase().includes(query) ||
+            (m.numeroSocio || '').toLowerCase().includes(query);
+        const matchStatus = !statusFilter || m.estado === statusFilter;
+        return matchSearch && matchStatus;
+    });
+
+    // Ordenar por número de socio
+    filtered.sort((a, b) => (a.numeroSocio || '').localeCompare(b.numeroSocio || '', undefined, { numeric: true }));
+
+    if (filtered.length === 0 && members.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+    }
+    emptyState.classList.add('hidden');
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center py-12 text-tek-500"><i class="fas fa-search text-3xl mb-3 block"></i>No se encontraron integrantes</div>';
+        return;
+    }
+
+    grid.innerHTML = filtered.map((m, i) => {
+        const statusCls = getStatusClass(m.estado);
+        const initials = (m.nombre || '??').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+        const photoHTML = m.foto
+            ? `<img src="${m.foto}" class="w-full h-full object-cover" alt="${m.nombre}">`
+            : `<span class="text-2xl font-bold text-tek-300">${initials}</span>`;
+        return `
+        <div class="member-card rounded-xl overflow-hidden fade-in-up" style="animation-delay:${i * 0.06}s">
+            <div class="p-5">
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-tek-700 bg-tek-900 flex items-center justify-center flex-shrink-0">
+                        ${photoHTML}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-semibold text-tek-100 truncate">${m.nombre || 'Sin nombre'}</h3>
+                            <span class="status-dot ${statusCls}" title="${m.estado}"></span>
+                        </div>
+                        ${m.apodo ? `<p class="text-tek-400 text-sm">"${m.apodo}"</p>` : ''}
+                        <p class="text-tek-500 text-xs mt-0.5">${m.numeroSocio || ''}</p>
+                    </div>
+                </div>
+                <div class="space-y-1.5 text-sm mb-4">
+                    <div class="flex items-center gap-2 text-tek-300">
+                        <i class="fas fa-star text-tek-500 text-xs w-4"></i>
+                        <span class="truncate">${m.especialidad || 'Sin especialidad'}</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-tek-400">
+                        <i class="fas fa-venus-mars text-tek-600 text-xs w-4"></i>
+                        <span>${m.sexo || 'N/A'}</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-tek-400">
+                        <i class="fas fa-calendar text-tek-600 text-xs w-4"></i>
+                        <span>${formatDate(m.fechaIngreso)}</span>
+                    </div>
+                </div>
+                <div class="card-actions flex gap-2">
+                    <button onclick="openEditModal('${m.id}')" class="flex-1 py-2 rounded-lg bg-tek-800/60 text-tek-300 text-xs hover:bg-tek-700 transition-colors" title="Editar">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button onclick="showCarnet('${m.id}')" class="flex-1 py-2 rounded-lg bg-tek-300/10 text-tek-300 text-xs hover:bg-tek-300/20 transition-colors" title="Carnet">
+                        <i class="fas fa-id-card"></i>
+                    </button>
+                    <button onclick="openDeleteModal('${m.id}')" class="flex-1 py-2 rounded-lg bg-red-500/10 text-red-400 text-xs hover:bg-red-500/20 transition-colors" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// --- Modales ---
+function openMemberModal(editId) {
+    editingId = null;
+    tempPhotoData = null;
+    document.getElementById('modal-title').textContent = 'Nuevo Integrante';
+    document.getElementById('btn-submit-text').textContent = 'Registrar';
+    document.getElementById('member-form').reset();
+    document.getElementById('member-id').value = '';
+    document.getElementById('photo-preview').classList.add('hidden');
+    document.getElementById('photo-icon').classList.remove('hidden');
+    document.getElementById('photo-zone').classList.remove('has-photo');
+    document.getElementById('inp-fecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('inp-especialidad-custom').classList.add('hidden');
+    document.getElementById('inp-especialidad-preset').value = 'Tomar hasta beber';
+    document.getElementById('member-modal').classList.add('active');
+}
+
+function openEditModal(id) {
+    const m = members.find(m => m.id === id);
+    if (!m) return;
+    editingId = id;
+    tempPhotoData = m.foto || null;
+    document.getElementById('modal-title').textContent = 'Editar Integrante';
+    document.getElementById('btn-submit-text').textContent = 'Actualizar';
+    document.getElementById('member-id').value = id;
+    document.getElementById('inp-nombre').value = m.nombre || '';
+    document.getElementById('inp-apodo').value = m.apodo || '';
+    document.getElementById('inp-sexo').value = m.sexo || 'Por Favor';
+    document.getElementById('inp-estado').value = m.estado || 'Activo';
+    document.getElementById('inp-fecha').value = m.fechaIngreso || '';
+    document.getElementById('inp-cita').value = m.cita || '';
+
+    // Especialidad
+    const presetEl = document.getElementById('inp-especialidad-preset');
+    const customEl = document.getElementById('inp-especialidad-custom');
+    const presetValues = Array.from(presetEl.options).map(o => o.value);
+    if (m.especialidad && presetValues.includes(m.especialidad)) {
+        presetEl.value = m.especialidad;
+        customEl.classList.add('hidden');
+        customEl.value = '';
+    } else if (m.especialidad) {
+        presetEl.value = 'custom';
+        customEl.classList.remove('hidden');
+        customEl.value = m.especialidad;
+    }
+
+    // Foto
+    if (m.foto) {
+        document.getElementById('photo-preview').src = m.foto;
+        document.getElementById('photo-preview').classList.remove('hidden');
+        document.getElementById('photo-icon').classList.add('hidden');
+        document.getElementById('photo-zone').classList.add('has-photo');
+    } else {
+        document.getElementById('photo-preview').classList.add('hidden');
+        document.getElementById('photo-icon').classList.remove('hidden');
+        document.getElementById('photo-zone').classList.remove('has-photo');
+    }
+
+    document.getElementById('member-modal').classList.add('active');
+}
+
+function closeMemberModal() {
+    document.getElementById('member-modal').classList.remove('active');
+    editingId = null;
+    tempPhotoData = null;
+}
+
+function openDeleteModal(id) {
+    deleteTargetId = id;
+    const m = members.find(m => m.id === id);
+    document.getElementById('delete-name').textContent = m ? m.nombre : '';
+    document.getElementById('delete-modal').classList.add('active');
+}
+
+function closeDeleteModal() {
+    document.getElementById('delete-modal').classList.remove('active');
+    deleteTargetId = null;
+}
+
+async function confirmDelete() {
+    if (deleteTargetId) {
+        try {
+            await deleteMember(deleteTargetId);
+            showToast('Integrante expulsado', 'success');
+        } catch (e) { showToast('Error al eliminar', 'error'); }
+    }
+    closeDeleteModal();
+}
+
+function openFirebaseModal() {
+    const config = loadFirebaseConfig();
+    if (config) {
+        document.getElementById('fb-apiKey').value = config.apiKey || '';
+        document.getElementById('fb-authDomain').value = config.authDomain || '';
+        document.getElementById('fb-projectId').value = config.projectId || '';
+        document.getElementById('fb-storageBucket').value = config.storageBucket || '';
+        document.getElementById('fb-appId').value = config.appId || '';
+    }
+    updateFirebaseStatus();
+    document.getElementById('firebase-modal').classList.add('active');
+}
+
+function closeFirebaseModal() {
+    document.getElementById('firebase-modal').classList.remove('active');
+}
+
+// --- Formulario ---
+async function handleMemberSubmit(e) {
+    e.preventDefault();
+    const presetVal = document.getElementById('inp-especialidad-preset').value;
+    const customVal = document.getElementById('inp-especialidad-custom').value.trim();
+    const especialidad = presetVal === 'custom' ? (customVal || 'Tomar hasta beber') : presetVal;
+
+    const data = {
+        nombre: document.getElementById('inp-nombre').value.trim(),
+        apodo: document.getElementById('inp-apodo').value.trim(),
+        sexo: document.getElementById('inp-sexo').value,
+        estado: document.getElementById('inp-estado').value,
+        especialidad: especialidad,
+        fechaIngreso: document.getElementById('inp-fecha').value,
+        cita: document.getElementById('inp-cita').value.trim(),
+        foto: tempPhotoData,
+    };
+
+    if (!data.nombre) { showToast('El nombre es obligatorio', 'error'); return; }
+
+    try {
+        if (editingId) {
+            await updateMember(editingId, data);
+            showToast('Integrante actualizado', 'success');
+        } else {
+            await addMember(data);
+            showToast('Nuevo integrante registrado', 'success');
+        }
+        closeMemberModal();
+    } catch (e) {
+        showToast('Error al guardar: ' + e.message, 'error');
+    }
+}
+
+// --- Especialidad personalizada ---
+document.getElementById('inp-especialidad-preset').addEventListener('change', function() {
+    const customEl = document.getElementById('inp-especialidad-custom');
+    if (this.value === 'custom') { customEl.classList.remove('hidden'); customEl.focus(); }
+    else { customEl.classList.add('hidden'); customEl.value = ''; }
+});
+
+// --- Foto ---
+function handlePhotoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showToast('La imagen no debe superar 5MB', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        resizeImage(ev.target.result, 300, 300, (resized) => {
+            tempPhotoData = resized;
+            document.getElementById('photo-preview').src = resized;
+            document.getElementById('photo-preview').classList.remove('hidden');
+            document.getElementById('photo-icon').classList.add('hidden');
+            document.getElementById('photo-zone').classList.add('has-photo');
+        });
+    };
+    reader.readAsDataURL(file);
+}
+
+function resizeImage(dataUrl, maxW, maxH, callback) {
+    const img = new Image();
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxW) { h = h * (maxW / w); w = maxW; }
+        if (h > maxH) { w = w * (maxH / h); h = maxH; }
+        canvas.width = Math.max(1, Math.round(w));
+        canvas.height = Math.max(1, Math.round(h));
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        callback(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.src = dataUrl;
+}
+
+// --- CARNET ---
+function showCarnet(id) {
+    const m = members.find(m => m.id === id);
+    if (!m) return;
+    currentCarnetMember = m;
+    renderCarnet(m);
+    document.getElementById('carnet-modal').classList.add('active');
+}
+
+function closeCarnetModal() {
+    document.getElementById('carnet-modal').classList.remove('active');
+    currentCarnetMember = null;
+}
+
+function renderCarnet(m) {
+    const photoHTML = m.foto
+        ? `<img src="${m.foto}" alt="${m.nombre}">`
+        : `<div class="no-photo"><i class="fas fa-user"></i></div>`;
+
+    const initials = (m.nombre || '??').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    const photoFrameHTML = m.foto
+        ? `<img src="${m.foto}" alt="${m.nombre}">`
+        : `<div class="no-photo" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#8b6508;font-size:32px;font-weight:bold;">${initials}</div>`;
+
+    document.getElementById('carnet-render').innerHTML = `
+        <div class="carnet-bg"></div>
+        <div class="carnet-watermark">TEKILA</div>
+        <div class="carnet-border-outer"></div>
+        <div class="carnet-border-inner"></div>
+        <div class="carnet-corner tl"></div>
+        <div class="carnet-corner tr"></div>
+        <div class="carnet-corner bl"></div>
+        <div class="carnet-corner br"></div>
+
+        <div class="carnet-header-bar">
+            <img src="${LOGO_URL}" class="logo-img" onerror="this.style.display='none'">
+            <div class="header-text">
+                <div class="header-title">BAR TEKILA & ASOCIADOS</div>
+                <div class="header-sub">IDENTIFICACION OFICIAL</div>
+            </div>
+        </div>
+
+        <div class="carnet-doc-title">CARNET DE CÁNADOR</div>
+
+        <div class="carnet-body">
+            <div class="carnet-photo-frame">
+                ${photoFrameHTML}
+            </div>
+            <div class="carnet-info">
+                <div class="carnet-field">
+                    <span class="carnet-label">Nombre:</span>
+                    <span class="carnet-value">${(m.nombre || 'N/A').toUpperCase()}</span>
+                </div>
+                <div class="carnet-field">
+                    <span class="carnet-label">Apodo:</span>
+                    <span class="carnet-value">${(m.apodo || 'N/A').toUpperCase()}</span>
+                </div>
+                <div class="carnet-field">
+                    <span class="carnet-label">Sexo:</span>
+                    <span class="carnet-value">${(m.sexo || 'N/A').toUpperCase()}</span>
+                </div>
+                <div class="carnet-field">
+                    <span class="carnet-label">Especialidad:</span>
+                    <span class="carnet-value">${(m.especialidad || 'N/A').toUpperCase()}</span>
+                </div>
+                <div class="carnet-field">
+                    <span class="carnet-label">Ingreso:</span>
+                    <span class="carnet-value">${formatDate(m.fechaIngreso)}</span>
+                </div>
+                ${m.cita ? `<div class="carnet-field" style="margin-top:4px;"><span class="carnet-value" style="font-size:9px;font-style:italic;color:#6d4c00;font-weight:400;">"${m.cita}"</span></div>` : ''}
+            </div>
+        </div>
+
+        <div class="carnet-footer">
+            <div class="carnet-stamp">
+                <div class="carnet-stamp-inner">
+                    <div style="font-size:6px;">BAR TEKILA</div>
+                    <div class="carnet-stamp-star">&#9733;</div>
+                    <div style="font-size:5px;">& ASOCIADOS</div>
+                </div>
+            </div>
+            <div style="flex:1;text-align:center;">
+                <div style="font-size:7px;color:#8b6508;margin-bottom:1px;">Vigencia: Hasta que el cuerpo aguante</div>
+            </div>
+            <div style="text-align:right;">
+                <div class="carnet-number">${m.numeroSocio || 'BT-???'}</div>
+                <div class="carnet-validity">Estado: ${(m.estado || 'N/A').toUpperCase()}</div>
+            </div>
+        </div>
+    `;
+}
+
+async function downloadCarnetPNG() {
+    const el = document.getElementById('carnet-render');
+    if (!el || !currentCarnetMember) return;
+    try {
+        await document.fonts.ready;
+        const canvas = await html2canvas(el, {
+            scale: 3,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: null,
+            logging: false,
+        });
+        const link = document.createElement('a');
+        const apodo = currentCarnetMember.apodo || currentCarnetMember.nombre || 'carnet';
+        link.download = `carnet-${apodo.replace(/\s+/g, '-').toLowerCase()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('Carnet descargado como PNG', 'success');
+    } catch (e) {
+        console.error('Error exportando:', e);
+        showToast('Error al generar la imagen', 'error');
+    }
+}
+
+// --- Toast ---
+function showToast(message, type) {
+    const container = document.getElementById('toast-container');
+    const colors = {
+        success: 'bg-green-500/15 border-green-500/30 text-green-300',
+        error: 'bg-red-500/15 border-red-500/30 text-red-300',
+        info: 'bg-tek-300/15 border-tek-300/30 text-tek-200',
+    };
+    const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+    const toast = document.createElement('div');
+    toast.className = `toast ${colors[type] || colors.info} border rounded-lg px-4 py-3 text-sm flex items-center gap-2 shadow-lg min-w-[250px]`;
+    toast.style.backdropFilter = 'blur(12px)';
+    toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3600);
+}
+
+// --- Burbujas de fondo ---
+function createBubbles() {
+    const container = document.getElementById('bubbles-container');
+    for (let i = 0; i < 12; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        const size = 6 + Math.random() * 20;
+        bubble.style.width = size + 'px';
+        bubble.style.height = size + 'px';
+        bubble.style.left = Math.random() * 100 + '%';
+        bubble.style.animationDuration = (8 + Math.random() * 15) + 's';
+        bubble.style.animationDelay = Math.random() * 10 + 's';
+        container.appendChild(bubble);
+    }
+}
+
+// --- Datos de ejemplo ---
+function loadSampleData() {
+    const samples = [
+        { nombre: 'Cristian Medina', apodo: 'El Jefe', sexo: 'Por Favor', especialidad: 'Tomar hasta beber', estado: 'Leyenda', fechaIngreso: '2024-01-15', cita: 'Yo no bebo, solo cata' },
+        { nombre: 'Carlos Villanueva', apodo: 'El Catador', sexo: 'Si Por Favor', especialidad: 'Catador Oficial', estado: 'Activo', fechaIngreso: '2024-02-20', cita: 'Todo es mejor con tekila' },
+        { nombre: 'Maria Fernanda Lopez', apodo: 'La Reina', sexo: 'Dama de Honor', especialidad: 'Paz Social', estado: 'Activo', fechaIngreso: '2024-03-10', cita: 'La vida es muy corta para mal vino' },
+        { nombre: 'Roberto Castillo', apodo: 'El Filosofo', sexo: 'Macho Alfa', especialidad: 'Filosofo del Bar', estado: 'En Rehabilitación', fechaIngreso: '2024-04-05', cita: 'El que no arriesga no toma' },
+        { nombre: 'Andrea Gutierrez', apodo: 'La Animadora', sexo: 'Todos los Dias', especialidad: 'Animador Oficial', estado: 'Activo', fechaIngreso: '2024-05-12', cita: 'Hoy se bebe, mañana tambien' },
+        { nombre: 'Diego Morales', apodo: 'El Sobreviviente', sexo: 'Por Favor', especialidad: 'Sobreviviente', estado: 'Probation', fechaIngreso: '2024-06-01', cita: 'Sobrevivi al domingo' },
+    ];
+    samples.forEach((s, i) => {
+        members.push({
+            id: genId(),
+            numeroSocio: 'BT-' + String(i + 1).padStart(3, '0'),
+            ...s,
+            foto: null,
+            creadoEn: new Date().toISOString(),
+        });
+    });
+    saveToLocal();
+}
+
+// --- Inicialización ---
+function init() {
+    createBubbles();
+
+    // Cargar datos
+    loadFromLocal();
+    if (members.length === 0) { loadSampleData(); }
+
+    // Intentar conectar Firebase si hay config guardada
+    const fbConfig = loadFirebaseConfig();
+    if (fbConfig && fbConfig.apiKey && fbConfig.projectId) {
+        initFirebase(fbConfig);
+    }
+
+    renderAll();
+
+    // Cerrar modales con Escape
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            closeMemberModal();
+            closeCarnetModal();
+            closeFirebaseModal();
+            closeDeleteModal();
+        }
+    });
+
+    // Cerrar modales clickeando fuera
+    ['member-modal', 'carnet-modal', 'firebase-modal', 'delete-modal'].forEach(id => {
+        document.getElementById(id).addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+                if (id === 'member-modal') { editingId = null; tempPhotoData = null; }
+                if (id === 'carnet-modal') currentCarnetMember = null;
+                if (id === 'delete-modal') deleteTargetId = null;
+            }
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
