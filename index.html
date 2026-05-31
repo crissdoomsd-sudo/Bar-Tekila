@@ -1,851 +1,402 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bar Tekila & Asociados</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script>
-        tailwind.config={theme:{extend:{colors:{t:{50:'#fef9f0',100:'#f0dfc0',200:'#e8cc8e',300:'#d4a017',400:'#b8860b',500:'#8b6508',600:'#6d4c00',700:'#4a3300',800:'#2d1b0a',900:'#1a0f06'},c:{400:'#e85d3a',500:'#d14a28'},q:{400:'#2bb5a0',500:'#1f9d8a'}},fontFamily:{cinzel:['Cinzel','serif'],pop:['Poppins','sans-serif']}}}}
-    </script>
-    <style>
-        :root{--bg:#08090d;--s1:#10131c;--s2:#171b28;--s3:#1e2336;--bdr:#2a2e42;--gold:#d4a017;--coral:#e85d3a;--teal:#2bb5a0;--cream:#f0e6d3;--muted:#7a7468}
-        *{box-sizing:border-box;margin:0}
-        body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--cream);overflow-x:hidden}
-        ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--s1)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bar Tekila & Asociados</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{t:{50:'#fef9f0',100:'#f0dfc0',200:'#e8cc8e',300:'#d4a017',400:'#b8860b',500:'#8b6508',600:'#6d4c00',700:'#4a3300',800:'#2d1b0a',900:'#1a0f06'},c:{400:'#e85d3a',500:'#d14a28'},q:{400:'#2bb5a0',500:'#1f9d8a'}},fontFamily:{cinzel:['Cinzel','serif'],pop:['Poppins','sans-serif']}}}}
+</script>
+<style>
+:root{--bg:#08090d;--s1:#10131c;--s2:#171b28;--s3:#1e2336;--bdr:#2a2e42;--gold:#d4a017;--coral:#e85d3a;--teal:#2bb5a0;--cream:#f0e6d3;--muted:#7a7468}
+*{box-sizing:border-box;margin:0}body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--cream);overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--s1)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.logo-watermark{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.025;background:url('https://z-cdn-media.chatglm.cn/files/0622d5e2-aad1-4bec-8dc3-396f867a0083.png?auth_key=1880213657-9c06d06a198449ce833b0462d8e57c3d-0-940c95341292d56515cbd0324b98ff5b') center/350px no-repeat}
+.modal-ov{opacity:0;pointer-events:none;transition:opacity .3s}.modal-ov.on{opacity:1;pointer-events:auto}
+.modal-ov .mbox{transform:translateY(20px) scale(.97);transition:transform .3s cubic-bezier(.4,0,.2,1)}.modal-ov.on .mbox{transform:translateY(0) scale(1)}
+.toast{animation:tIn .4s ease-out,tOut .4s ease-in forwards;animation-delay:0s,3.2s}
+@keyframes tIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes tOut{from{opacity:1}to{opacity:0;transform:translateX(60%)}}
+.btn-g{background:linear-gradient(135deg,#d4a017,#b8860b);color:#1a0f06;font-weight:600;transition:all .3s;box-shadow:0 4px 15px rgba(212,160,23,.2)}.btn-g:hover{box-shadow:0 6px 25px rgba(212,160,23,.35);transform:translateY(-1px)}
+.mcard{background:linear-gradient(145deg,var(--s1),var(--s2));border:1px solid var(--bdr);transition:all .35s cubic-bezier(.4,0,.2,1);border-radius:14px}.mcard:hover{border-color:rgba(212,160,23,.3);box-shadow:0 8px 30px rgba(212,160,23,.08);transform:translateY(-4px)}.mcard .ca{opacity:0;transition:opacity .3s}.mcard:hover .ca{opacity:1}
+.sdot{width:8px;height:8px;border-radius:50%;display:inline-block}.sdot.Activo{background:#4ade80;box-shadow:0 0 6px rgba(74,222,128,.4)}.sdot.Leyenda{background:#d4a017;box-shadow:0 0 6px rgba(212,160,23,.4)}.sdot.rehab{background:#fb923c}.sdot.Probation{background:#f87171}.sdot.Inactivo{background:#94a3b8}
+.tab-b{position:relative;transition:color .3s;cursor:pointer}.tab-b.on{color:#d4a017}.tab-b.on::after{content:'';position:absolute;bottom:-2px;left:10%;right:10%;height:2px;background:#d4a017;border-radius:1px}
+.pupload{border:2px dashed rgba(212,160,23,.25);border-radius:12px;transition:all .3s;cursor:pointer}.pupload:hover{border-color:rgba(212,160,23,.5);background:rgba(212,160,23,.03)}
+.ecard{background:linear-gradient(145deg,var(--s1),var(--s2));border:1px solid var(--bdr);border-radius:12px;overflow:hidden;transition:all .3s}.ecard:hover{border-color:rgba(43,181,160,.3);transform:translateY(-2px)}
 
-        #bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+/* CARNET */
+.cw{width:560px;height:350px;position:relative;font-family:'Poppins',sans-serif;overflow:hidden;flex-shrink:0}
+.cbg{position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 14px,rgba(139,101,8,.02) 14px,rgba(139,101,8,.02) 15px),repeating-linear-gradient(-45deg,transparent,transparent 14px,rgba(139,101,8,.02) 14px,rgba(139,101,8,.02) 15px),linear-gradient(170deg,#f8f0dd,#f0dfc0 50%,#e5d3a5)}
+.cbo{position:absolute;inset:0;border:3px solid #6d4c00;border-radius:10px}.cbi{position:absolute;inset:5px;border:1.5px solid #8b6508;border-radius:7px}
+.ccn{position:absolute;width:14px;height:14px;border-color:#6d4c00;border-style:solid}.ccn.tl{top:8px;left:8px;border-width:2px 0 0 2px;border-radius:3px 0 0 0}.ccn.tr{top:8px;right:8px;border-width:2px 2px 0 0;border-radius:0 3px 0 0}.ccn.bl{bottom:8px;left:8px;border-width:0 0 2px 2px;border-radius:0 0 0 3px}.ccn.br{bottom:8px;right:8px;border-width:0 2px 2px 0;border-radius:0 0 3px 0}
+.clogo-mark{position:absolute;pointer-events:none;opacity:.06;z-index:1}
+.tricolor{display:flex;height:5px;width:100%}.tricolor div{flex:1}.tricolor .tc-r{background:#D52B1E}.tricolor .tc-y{background:#F9E300}.tricolor .tc-v{background:#007934}
+.cf{display:flex;gap:4px;align-items:baseline}.cl{font-size:7.5px;color:#8b6508;text-transform:uppercase;letter-spacing:.8px;min-width:80px;font-weight:600}.cv{font-size:10px;color:#2d1b0a;font-weight:700;text-transform:uppercase}
+.stripe{position:absolute;left:0;right:0;text-align:center;font-family:'Cinzel',serif;font-weight:900;letter-spacing:3px;color:#f5e6c8;z-index:2}
+.cpf{border:2px solid #6d4c00;background:#e8d5a8;border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden}.cpf img{width:100%;height:100%;object-fit:cover}
+.cback-qr{width:110px;height:110px;border:2px solid #6d4c00;border-radius:6px;background:#efe0c4;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0 auto}.cback-qr img{width:100%;height:100%;object-fit:contain}
 
-        .modal-ov{opacity:0;pointer-events:none;transition:opacity .3s}.modal-ov.on{opacity:1;pointer-events:auto}
-        .modal-ov .mbox{transform:translateY(20px) scale(.97);transition:transform .3s cubic-bezier(.4,0,.2,1)}
-        .modal-ov.on .mbox{transform:translateY(0) scale(1)}
+/* Cropper */
+.crop-wrap{position:relative;width:300px;height:360px;overflow:hidden;background:#000;border-radius:8px;margin:0 auto;touch-action:none;cursor:grab}
+.crop-wrap:active{cursor:grabbing}.crop-wrap img{position:absolute;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.crop-frame{position:absolute;border:2px solid rgba(212,160,23,.8);box-shadow:0 0 0 9999px rgba(0,0,0,.6);border-radius:4px;pointer-events:none}
 
-        .toast{animation:tIn .4s ease-out,tOut .4s ease-in forwards;animation-delay:0s,3.2s}
-        @keyframes tIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
-        @keyframes tOut{from{opacity:1}to{opacity:0;transform:translateX(60%)}}
-
-        .btn-g{background:linear-gradient(135deg,#d4a017,#b8860b);color:#1a0f06;font-weight:600;transition:all .3s;box-shadow:0 4px 15px rgba(212,160,23,.2)}
-        .btn-g:hover{box-shadow:0 6px 25px rgba(212,160,23,.35);transform:translateY(-1px)}
-
-        .mcard{background:linear-gradient(145deg,var(--s1),var(--s2));border:1px solid var(--bdr);transition:all .35s cubic-bezier(.4,0,.2,1);border-radius:14px}
-        .mcard:hover{border-color:rgba(212,160,23,.35);box-shadow:0 8px 32px rgba(212,160,23,.08);transform:translateY(-4px)}
-        .mcard .ca{opacity:0;transition:opacity .3s}.mcard:hover .ca{opacity:1}
-
-        .sdot{width:8px;height:8px;border-radius:50%;display:inline-block}
-        .sdot.activo{background:#4ade80;box-shadow:0 0 6px rgba(74,222,128,.4)}
-        .sdot.leyenda{background:#d4a017;box-shadow:0 0 6px rgba(212,160,23,.4)}
-        .sdot.rehab{background:#fb923c;box-shadow:0 0 6px rgba(251,146,60,.4)}
-        .sdot.probation{background:#f87171;box-shadow:0 0 6px rgba(248,113,113,.4)}
-        .sdot.inactivo{background:#94a3b8}
-
-        .tab-b{position:relative;transition:color .3s;cursor:pointer}.tab-b.on{color:#d4a017}
-        .tab-b.on::after{content:'';position:absolute;bottom:-2px;left:10%;right:10%;height:2px;background:#d4a017;border-radius:1px}
-
-        .pupload{border:2px dashed rgba(212,160,23,.25);border-radius:12px;transition:all .3s;cursor:pointer}
-        .pupload:hover{border-color:rgba(212,160,23,.5);background:rgba(212,160,23,.03)}
-
-        .ecard{background:linear-gradient(145deg,var(--s1),var(--s2));border:1px solid var(--bdr);border-radius:12px;overflow:hidden;transition:all .3s}
-        .ecard:hover{border-color:rgba(43,181,160,.3);transform:translateY(-2px)}
-
-        /* CARNET */
-        .cw{width:540px;height:340px;position:relative;font-family:'Poppins',sans-serif;overflow:hidden;flex-shrink:0}
-        .cbg{position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 14px,rgba(139,101,8,.02) 14px,rgba(139,101,8,.02) 15px),repeating-linear-gradient(-45deg,transparent,transparent 14px,rgba(139,101,8,.02) 14px,rgba(139,101,8,.02) 15px),linear-gradient(170deg,#f8f0dd,#f0dfc0 50%,#e5d3a5)}
-        .cbo{position:absolute;inset:0;border:3px solid #6d4c00;border-radius:12px}
-        .cbi{position:absolute;inset:5px;border:1.5px solid #8b6508;border-radius:8px}
-        .ccn{position:absolute;width:16px;height:16px;border-color:#6d4c00;border-style:solid}
-        .ccn.tl{top:9px;left:9px;border-width:2px 0 0 2px;border-radius:3px 0 0 0}
-        .ccn.tr{top:9px;right:9px;border-width:2px 2px 0 0;border-radius:0 3px 0 0}
-        .ccn.bl{bottom:9px;left:9px;border-width:0 0 2px 2px;border-radius:0 0 0 3px}
-        .ccn.br{bottom:9px;right:9px;border-width:0 2px 2px 0;border-radius:0 0 3px 0}
-        .chdr{position:absolute;top:12px;left:12px;right:12px;height:62px;background:linear-gradient(135deg,#4e3500,#6d4c00,#4e3500);border-radius:6px;display:flex;align-items:center;padding:0 12px;gap:10px}
-        .chdr .limg{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #d4a017}
-        .chdr .ht{font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:2px;color:#f5e6c8}
-        .chdr .hs{font-size:7px;letter-spacing:3px;color:rgba(245,230,200,.6);margin-top:1px}
-        .cdt{position:absolute;top:82px;left:0;right:0;text-align:center;font-family:'Cinzel',serif;font-size:14px;font-weight:900;color:#6d4c00;letter-spacing:3px}
-        .cbd{position:absolute;top:108px;left:20px;right:20px;bottom:50px;display:flex;gap:16px}
-        .cpf{width:100px;height:120px;flex-shrink:0;border:2px solid #6d4c00;background:#e8d5a8;border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-        .cpf img{width:100%;height:100%;object-fit:cover}
-        .cinf{flex:1;display:flex;flex-direction:column;gap:2px;padding-top:2px}
-        .cf{display:flex;gap:4px;align-items:baseline}
-        .cl{font-size:7.5px;color:#8b6508;text-transform:uppercase;letter-spacing:1px;min-width:72px;font-weight:600}
-        .cv{font-size:10.5px;color:#2d1b0a;font-weight:700;text-transform:uppercase}
-        .cft{position:absolute;bottom:10px;left:20px;right:20px;height:36px;display:flex;align-items:center;justify-content:space-between}
-        .cstamp{width:44px;height:44px;border:2.5px solid rgba(178,34,34,.45);border-radius:50%;display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);opacity:.55}
-        .cstamp::before{content:'';position:absolute;inset:3px;border:1.5px solid rgba(178,34,34,.25);border-radius:50%}
-        .cstmp-i{text-align:center;color:rgba(178,34,34,.6);font-size:5px;font-weight:700;line-height:1.1}
-        .cstmp-s{font-size:11px;color:rgba(178,34,34,.5)}
-        .cnum{font-family:'Cinzel',serif;font-size:9px;color:#6d4c00;font-weight:700;letter-spacing:2px}
-        .cwmark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-25deg);font-family:'Cinzel',serif;font-size:50px;font-weight:900;color:rgba(139,101,8,.03);letter-spacing:8px;pointer-events:none;white-space:nowrap}
-        .clogo-mark{position:absolute;opacity:.06;pointer-events:none}
-
-        /* Reverso */
-        .cback-qr{width:130px;height:130px;border:2px solid #6d4c00;border-radius:8px;background:#efe0c4;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0 auto}
-        .cback-qr img{width:100%;height:100%;object-fit:contain}
-        .crules{font-size:7px;color:#6d4c00;line-height:1.6}
-        .crules ol{padding-left:12px;margin:0}.crules li{margin-bottom:1px}
-        .cdiv{height:1px;background:linear-gradient(90deg,transparent,#8b6508,transparent);margin:5px 0}
-
-        /* Cropper */
-        .crop-area{position:relative;width:280px;height:320px;overflow:hidden;background:#000;border-radius:8px;cursor:grab;margin:0 auto;touch-action:none}
-        .crop-area:active{cursor:grabbing}
-        .crop-area img{position:absolute;user-select:none;-webkit-user-drag:none}
-        .crop-overlay{position:absolute;inset:0;pointer-events:none}
-        .crop-frame{position:absolute;border:2px dashed rgba(212,160,23,.7);box-shadow:0 0 0 9999px rgba(0,0,0,.55);border-radius:4px}
-
-        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-        .fup{animation:fadeUp .5s ease-out forwards}
-
-        @media(max-width:640px){
-            .cw{width:340px;height:214px}
-            .chdr{height:44px;padding:0 8px}.chdr .limg{width:30px;height:30px}.chdr .ht{font-size:9px}
-            .cdt{font-size:10px;top:62px}.cbd{top:80px;left:14px;right:14px;bottom:38px;gap:10px}
-            .cpf{width:65px;height:80px}.cl{font-size:6px;min-width:50px}.cv{font-size:8px}
-            .cft{bottom:8px;left:14px;right:14px}.cstamp{width:30px;height:30px}.cnum{font-size:7px}
-            .cwmark{font-size:28px}.clogo-mark{width:120px!important;height:120px!important}
-            .cback-qr{width:85px;height:85px}
-        }
-    </style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}.fup{animation:fadeUp .5s ease-out forwards}
+@media(max-width:640px){.cw{width:340px;height:213px}.clogo-mark{width:100px!important;height:100px!important}.crop-wrap{width:240px;height:290px}}
+</style>
 </head>
 <body class="min-h-screen">
-
 <canvas id="bg-canvas"></canvas>
+<div class="logo-watermark"></div>
 <div id="toasts" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2"></div>
 
 <!-- HEADER -->
-<header class="sticky top-0 z-40 border-b" style="background:rgba(8,9,13,.92);backdrop-filter:blur(16px);border-color:var(--bdr)">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-            <img src="https://z-cdn-media.chatglm.cn/files/0622d5e2-aad1-4bec-8dc3-396f867a0083.png?auth_key=1880213657-9c06d06a198449ce833b0462d8e57c3d-0-940c95341292d56515cbd0324b98ff5b"
-                 alt="Logo" class="w-11 h-11 rounded-full border-2 border-t-300/60 shadow-lg object-cover" onerror="this.style.display='none'">
-            <div class="hidden sm:block">
-                <h1 class="font-cinzel font-bold text-lg text-t-100 tracking-wider leading-tight">BAR TEKILA</h1>
-                <p class="text-t-400 text-[9px] tracking-[3px] font-cinzel">& ASOCIADOS</p>
-            </div>
-        </div>
-        <nav class="flex items-center gap-1 rounded-lg p-1 border" style="background:var(--s1);border-color:var(--bdr)">
-            <button onclick="switchTab('inicio')" id="tab-inicio" class="tab-b on px-3 py-1.5 rounded-md text-sm font-medium"><i class="fas fa-home mr-1"></i>Inicio</button>
-            <button onclick="switchTab('registro')" id="tab-registro" class="tab-b px-3 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-300"><i class="fas fa-user-shield mr-1"></i>Registro</button>
-        </nav>
-        <div class="flex items-center gap-2">
-            <div id="auth-out" class="text-xs text-gray-600 hidden sm:block">No autenticado</div>
-            <div id="auth-in" class="hidden items-center gap-2">
-                <img id="auth-av" class="w-7 h-7 rounded-full border object-cover" style="border-color:var(--bdr)" src="">
-                <span id="auth-nm" class="text-t-100 text-xs font-medium hidden sm:inline max-w-[90px] truncate"></span>
-                <button onclick="signOut()" class="text-gray-500 hover:text-red-400 text-xs" title="Salir"><i class="fas fa-sign-out-alt"></i></button>
-            </div>
-        </div>
-    </div>
-</header>
+<header class="sticky top-0 z-40 border-b" style="background:rgba(8,9,13,.93);backdrop-filter:blur(16px);border-color:var(--bdr)">
+<div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<img src="https://z-cdn-media.chatglm.cn/files/0622d5e2-aad1-4bec-8dc3-396f867a0083.png?auth_key=1880213657-9c06d06a198449ce833b0462d8e57c3d-0-940c95341292d56515cbd0324b98ff5b" alt="Logo" class="w-11 h-11 rounded-full border-2 border-t-300/60 shadow-lg object-cover" onerror="this.style.display='none'">
+<div class="hidden sm:block"><h1 class="font-cinzel font-bold text-lg text-t-100 tracking-wider leading-tight">BAR TEKILA</h1><p class="text-t-400 text-[9px] tracking-[3px] font-cinzel">& ASOCIADOS</p></div>
+</div>
+<nav class="flex items-center gap-1 rounded-lg p-1 border" style="background:var(--s1);border-color:var(--bdr)">
+<button onclick="switchTab('inicio')" id="tab-inicio" class="tab-b on px-3 py-1.5 rounded-md text-sm font-medium"><i class="fas fa-home mr-1"></i>Inicio</button>
+<button onclick="switchTab('registro')" id="tab-registro" class="tab-b px-3 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-300"><i class="fas fa-user-shield mr-1"></i>Registro</button>
+</nav>
+<div class="flex items-center gap-2">
+<div id="auth-out" class="text-xs text-gray-600 hidden sm:block">No autenticado</div>
+<div id="auth-in" class="hidden items-center gap-2">
+<img id="auth-av" class="w-7 h-7 rounded-full border object-cover" style="border-color:var(--bdr)" src=""><span id="auth-nm" class="text-t-100 text-xs font-medium hidden sm:inline max-w-[90px] truncate"></span>
+<button onclick="signOut()" class="text-gray-500 hover:text-red-400 text-xs" title="Salir"><i class="fas fa-sign-out-alt"></i></button>
+</div></div></div></header>
 
 <!-- INICIO -->
 <main id="pg-inicio" class="relative z-10 max-w-7xl mx-auto px-4 py-6">
-    <!-- Stats + Search -->
-    <div class="flex flex-wrap items-center gap-3 mb-6">
-        <div class="flex items-center gap-2 px-4 py-2.5 rounded-xl border" style="background:var(--s1);border-color:var(--bdr)">
-            <div class="w-8 h-8 rounded-lg bg-t-300/10 flex items-center justify-center text-t-300 text-sm"><i class="fas fa-users"></i></div>
-            <div><p class="text-[10px] text-gray-500 uppercase">Total</p><p id="s-total" class="text-lg font-bold text-t-100">0</p></div>
-        </div>
-        <div class="flex-1 min-w-[180px] relative">
-            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs"></i>
-            <input id="sinput" type="text" placeholder="Buscar integrante..." oninput="renderInicio()"
-                class="w-full rounded-lg pl-9 pr-3 py-2.5 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border transition-colors" style="background:var(--s1);border-color:var(--bdr)" onfocus="this.style.borderColor='rgba(212,160,23,.4)'" onblur="this.style.borderColor='var(--bdr)'">
-        </div>
-    </div>
-
-    <!-- Cumpleaños -->
-    <div id="bday-section" class="hidden mb-6">
-        <h2 class="font-cinzel font-bold text-base text-c-400 mb-3 flex items-center gap-2"><i class="fas fa-birthday-cake text-sm"></i>Cumpleaños</h2>
-        <div id="bday-grid" class="flex gap-3 overflow-x-auto pb-2"></div>
-    </div>
-
-    <!-- Eventos -->
-    <div id="ev-section" class="mb-6">
-        <h2 class="font-cinzel font-bold text-base text-q-400 mb-3 flex items-center gap-2"><i class="fas fa-calendar-star text-sm"></i>Eventos y Fiestas</h2>
-        <div id="ev-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-        <p id="ev-empty" class="hidden text-center py-6 text-gray-600 text-sm"><i class="fas fa-glass-cheers text-xl mb-2 block"></i>Sin eventos programados</p>
-    </div>
-
-    <!-- Miembros -->
-    <div>
-        <h2 class="font-cinzel font-bold text-base text-t-200 mb-3 flex items-center gap-2"><i class="fas fa-id-badge text-sm"></i>Integrantes</h2>
-        <div id="m-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
-        <p id="m-empty" class="hidden text-center py-10 text-gray-600 text-sm"><i class="fas fa-user-friends text-2xl mb-2 block"></i>Sin integrantes registrados</p>
-    </div>
-</main>
+<div class="flex flex-wrap items-center gap-3 mb-6">
+<div class="flex items-center gap-2 px-4 py-2.5 rounded-xl border" style="background:var(--s1);border-color:var(--bdr)">
+<div class="w-8 h-8 rounded-lg bg-t-300/10 flex items-center justify-center text-t-300 text-sm"><i class="fas fa-users"></i></div>
+<div><p class="text-[10px] text-gray-500 uppercase">Total</p><p id="s-total" class="text-lg font-bold text-t-100">0</p></div></div>
+<div class="flex-1 min-w-[180px] relative">
+<i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs"></i>
+<input id="sinput" type="text" placeholder="Buscar integrante..." oninput="renderInicio()" class="w-full rounded-lg pl-9 pr-3 py-2.5 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border transition-colors" style="background:var(--s1);border-color:var(--bdr)" onfocus="this.style.borderColor='rgba(212,160,23,.4)'" onblur="this.style.borderColor='var(--bdr)'">
+</div></div>
+<div id="ev-section" class="mb-6">
+<h2 class="font-cinzel font-bold text-base text-q-400 mb-3 flex items-center gap-2"><i class="fas fa-calendar-star text-sm"></i>Eventos y Fiestas</h2>
+<div id="ev-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+<p id="ev-empty" class="hidden text-center py-6 text-gray-600 text-sm"><i class="fas fa-glass-cheers text-xl mb-2 block"></i>Sin eventos programados</p>
+</div>
+<div><h2 class="font-cinzel font-bold text-base text-t-200 mb-3 flex items-center gap-2"><i class="fas fa-id-badge text-sm"></i>Integrantes</h2>
+<div id="m-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+<p id="m-empty" class="hidden text-center py-10 text-gray-600 text-sm"><i class="fas fa-user-friends text-2xl mb-2 block"></i>Sin integrantes registrados</p>
+</div></main>
 
 <!-- REGISTRO -->
 <section id="pg-registro" class="relative z-10 max-w-7xl mx-auto px-4 py-6 hidden">
-    <!-- Login -->
-    <div id="login-req" class="flex flex-col items-center py-16">
-        <div class="w-20 h-20 rounded-full flex items-center justify-center mb-5" style="background:var(--s2);border:1px solid var(--bdr)"><i class="fas fa-lock text-2xl text-gray-500"></i></div>
-        <h2 class="font-cinzel font-bold text-xl text-t-100 mb-2">Acceso Restringido</h2>
-        <p class="text-gray-500 text-sm mb-5 text-center max-w-sm">Inicia sesión con Google para gestionar integrantes y eventos.</p>
-        <button onclick="signIn()" class="flex items-center gap-3 bg-white text-gray-700 font-medium px-5 py-2.5 rounded-lg hover:bg-gray-100 transition-colors shadow-lg text-sm">
-            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-            Iniciar sesión con Google
-        </button>
-    </div>
-
-    <!-- Admin -->
-    <div id="admin-pg" class="hidden">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-5 border-b pb-3" style="border-color:var(--bdr)">
-            <div class="flex gap-2">
-                <button onclick="switchSub('m')" id="st-m" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-t-300/10 text-t-200 border border-t-300/20 transition-all"><i class="fas fa-users mr-1"></i>Integrantes</button>
-                <button onclick="switchSub('e')" id="st-e" class="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-t-200 border border-transparent transition-all"><i class="fas fa-calendar-alt mr-1"></i>Eventos</button>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="printPDF()" class="px-3 py-1.5 rounded-lg text-sm border text-q-400 hover:bg-q-400/10 transition-colors" style="border-color:var(--bdr)"><i class="fas fa-file-pdf mr-1"></i>PDF Carnets</button>
-                <button id="btn-add-m" onclick="openMemberModal()" class="btn-g px-4 py-1.5 rounded-lg text-sm flex items-center gap-1.5"><i class="fas fa-user-plus"></i>Nuevo</button>
-                <button id="btn-add-e" onclick="openEventModal()" class="btn-g px-4 py-1.5 rounded-lg text-sm flex items-center gap-1.5 hidden"><i class="fas fa-calendar-plus"></i>Nuevo Evento</button>
-            </div>
-        </div>
-        <div id="adm-m"></div>
-        <div id="adm-e" class="hidden"></div>
-    </div>
-</section>
+<div id="login-req" class="flex flex-col items-center py-16">
+<div class="w-20 h-20 rounded-full flex items-center justify-center mb-5" style="background:var(--s2);border:1px solid var(--bdr)"><i class="fas fa-lock text-2xl text-gray-500"></i></div>
+<h2 class="font-cinzel font-bold text-xl text-t-100 mb-2">Acceso Restringido</h2>
+<p class="text-gray-500 text-sm mb-5 text-center max-w-sm">Inicia sesión con Google para gestionar integrantes y eventos.</p>
+<button onclick="signIn()" class="flex items-center gap-3 bg-white text-gray-700 font-medium px-5 py-2.5 rounded-lg hover:bg-gray-100 transition-colors shadow-lg text-sm">
+<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+Iniciar sesión con Google</button></div>
+<div id="admin-pg" class="hidden">
+<div class="flex flex-wrap items-center justify-between gap-3 mb-5 border-b pb-3" style="border-color:var(--bdr)">
+<div class="flex gap-2">
+<button onclick="switchSub('m')" id="st-m" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-t-300/10 text-t-200 border border-t-300/20 transition-all"><i class="fas fa-users mr-1"></i>Integrantes</button>
+<button onclick="switchSub('e')" id="st-e" class="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-t-200 border border-transparent transition-all"><i class="fas fa-calendar-alt mr-1"></i>Eventos</button>
+</div>
+<div class="flex gap-2">
+<button onclick="printPDF()" class="px-3 py-1.5 rounded-lg text-sm border text-q-400 hover:bg-q-400/10 transition-colors" style="border-color:var(--bdr)"><i class="fas fa-file-pdf mr-1"></i>PDF Carnets</button>
+<button id="btn-add-m" onclick="openMemberModal()" class="btn-g px-4 py-1.5 rounded-lg text-sm flex items-center gap-1.5"><i class="fas fa-user-plus"></i>Nuevo</button>
+<button id="btn-add-e" onclick="openEventModal()" class="btn-g px-4 py-1.5 rounded-lg text-sm flex items-center gap-1.5 hidden"><i class="fas fa-calendar-plus"></i>Nuevo Evento</button>
+</div></div>
+<div id="adm-m"></div><div id="adm-e" class="hidden"></div></div></section>
 
 <!-- MODAL: Miembro -->
 <div id="ml-m" class="modal-ov fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,.75)">
-    <div class="mbox w-full max-w-lg rounded-2xl border overflow-hidden max-h-[92vh] flex flex-col" style="background:linear-gradient(160deg,var(--s1),var(--s2));border-color:var(--bdr)">
-        <div class="flex items-center justify-between px-5 py-3 border-b flex-shrink-0" style="border-color:var(--bdr)">
-            <h2 id="ml-mt" class="font-cinzel font-bold text-sm text-t-100">Nuevo Integrante</h2>
-            <button onclick="closeML('m')" class="text-gray-500 hover:text-t-100"><i class="fas fa-times"></i></button>
-        </div>
-        <form id="frm-m" onsubmit="submitMember(event)" class="p-5 space-y-3 overflow-y-auto">
-            <input type="hidden" id="m-id">
-            <!-- Foto -->
-            <div>
-                <label class="text-t-200 text-xs font-medium mb-1 block">Fotografia</label>
-                <div class="pupload p-3 flex items-center gap-3" onclick="document.getElementById('fi-photo').click()">
-                    <div id="ph-pc" class="w-14 h-14 rounded-full overflow-hidden border-2 bg-black/30 flex items-center justify-center flex-shrink-0" style="border-color:var(--bdr)">
-                        <i id="ph-ic" class="fas fa-camera text-lg text-gray-500"></i>
-                        <img id="ph-pv" class="w-full h-full object-cover hidden">
-                    </div>
-                    <div><p class="text-t-200 text-sm">Subir foto</p><p class="text-gray-600 text-xs">Se puede recortar despues</p></div>
-                </div>
-                <input type="file" id="fi-photo" accept="image/*" class="hidden" onchange="onPhotoPick(event)">
-                <button type="button" id="btn-crop" onclick="openCropper()" class="hidden mt-1 text-t-300 text-xs hover:text-t-100 transition-colors"><i class="fas fa-crop-alt mr-1"></i>Recortar foto</button>
-            </div>
-            <!-- Imagen reverso -->
-            <div>
-                <label class="text-t-200 text-xs font-medium mb-1 block">Imagen Reverso <span class="text-gray-600">(QR o imagen)</span></label>
-                <div class="pupload p-3 flex items-center gap-3" onclick="document.getElementById('fi-back').click()">
-                    <div id="bk-pc" class="w-12 h-12 rounded-lg overflow-hidden border-2 bg-black/30 flex items-center justify-center flex-shrink-0" style="border-color:var(--bdr)">
-                        <i id="bk-ic" class="fas fa-qrcode text-gray-500"></i>
-                        <img id="bk-pv" class="w-full h-full object-cover hidden">
-                    </div>
-                    <div><p class="text-t-200 text-sm">Subir imagen/QR</p><p class="text-gray-600 text-xs">Si no, se genera QR auto</p></div>
-                </div>
-                <input type="file" id="fi-back" accept="image/*" class="hidden" onchange="onBackPick(event)">
-                <button type="button" id="btn-rmbk" onclick="rmBackImg()" class="hidden mt-1 text-red-400 text-xs hover:text-red-300"><i class="fas fa-trash-alt mr-1"></i>Quitar imagen</button>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="col-span-2"><label class="text-t-200 text-xs font-medium mb-0.5 block">Nombre Completo *</label><input type="text" id="inp-nom" required class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Ej: Cristian Medina"></div>
-                <div><label class="text-t-200 text-xs font-medium mb-0.5 block">Apodo</label><input type="text" id="inp-apo" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Ej: El Jefe"></div>
-                <div><label class="text-t-200 text-xs font-medium mb-0.5 block">Sexo</label><input type="text" id="inp-sex" list="dl-sex" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Escribe o selecciona">
-                    <datalist id="dl-sex"><option value="Por Favor"><option value="Si Por Favor"><option value="Macho Alfa"><option value="Dama de Honor"><option value="Todos los Dias"><option value="Sin Especificar"></datalist></div>
-                <div><label class="text-t-200 text-xs font-medium mb-0.5 block">Especialidad</label><input type="text" id="inp-esp" list="dl-esp" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Escribe o selecciona">
-                    <datalist id="dl-esp"><option value="Tomar hasta beber"><option value="Catador Oficial"><option value="Filosofo del Bar"><option value="Cantinero Amateur"><option value="Sobreviviente"><option value="Creador de Caos"><option value="Paz Social"><option value="Animador Oficial"></datalist></div>
-                <div><label class="text-t-200 text-xs font-medium mb-0.5 block">Estado</label><select id="inp-est" class="w-full rounded-lg px-3 py-2 text-t-100 text-sm border cursor-pointer" style="background:var(--s1);border-color:var(--bdr)"><option value="Activo">Activo</option><option value="En Rehabilitación">En Rehabilitación</option><option value="Probation">Probation</option><option value="Leyenda">Leyenda</option><option value="Inactivo">Inactivo</option></select></div>
-                <div><label class="text-t-200 text-xs font-medium mb-0.5 block">Fecha de Ingreso</label><input type="date" id="inp-fing" class="w-full rounded-lg px-3 py-2 text-t-100 text-sm border cursor-pointer" style="background:var(--s1);border-color:var(--bdr)"></div>
-                <div><label class="text-t-200 text-xs font-medium mb-0.5 block">Fecha de Nacimiento</label><input type="date" id="inp-fnac" class="w-full rounded-lg px-3 py-2 text-t-100 text-sm border cursor-pointer" style="background:var(--s1);border-color:var(--bdr)"></div>
-                <div class="col-span-2"><label class="text-t-200 text-xs font-medium mb-0.5 block">Cita Favorita</label><input type="text" id="inp-cit" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Ej: Yo no bebo, solo cata"></div>
-            </div>
-            <div class="flex gap-3 pt-1">
-                <button type="button" onclick="closeML('m')" class="flex-1 px-3 py-2 rounded-lg border text-gray-400 hover:bg-white/5 text-sm" style="border-color:var(--bdr)">Cancelar</button>
-                <button type="submit" class="flex-1 btn-g px-3 py-2 rounded-lg text-sm"><i class="fas fa-save mr-1"></i><span id="btn-mt">Guardar</span></button>
-            </div>
-        </form>
-    </div>
+<div class="mbox w-full max-w-lg rounded-2xl border overflow-hidden max-h-[92vh] flex flex-col" style="background:linear-gradient(160deg,var(--s1),var(--s2));border-color:var(--bdr)">
+<div class="flex items-center justify-between px-5 py-3 border-b flex-shrink-0" style="border-color:var(--bdr)">
+<h2 id="ml-mt" class="font-cinzel font-bold text-sm text-t-100">Nuevo Integrante</h2>
+<button onclick="closeML('m')" class="text-gray-500 hover:text-t-100"><i class="fas fa-times"></i></button></div>
+<form id="frm-m" onsubmit="submitMember(event)" class="p-5 space-y-3 overflow-y-auto">
+<input type="hidden" id="m-id">
+<div><label class="text-t-200 text-xs font-medium mb-1 block">Fotografia</label>
+<div class="pupload p-3 flex items-center gap-3" onclick="document.getElementById('fi-photo').click()">
+<div id="ph-pc" class="w-14 h-14 rounded-full overflow-hidden border-2 bg-black/30 flex items-center justify-center flex-shrink-0" style="border-color:var(--bdr)"><i id="ph-ic" class="fas fa-camera text-lg text-gray-500"></i><img id="ph-pv" class="w-full h-full object-cover hidden"></div>
+<div><p class="text-t-200 text-sm">Subir foto</p><p class="text-gray-600 text-xs">Podras mover y recortar despues</p></div></div>
+<input type="file" id="fi-photo" accept="image/*" class="hidden" onchange="onPhotoPick(event)">
+<button type="button" id="btn-crop" onclick="openCropper()" class="hidden mt-1 text-t-300 text-xs hover:text-t-100"><i class="fas fa-crop-alt mr-1"></i>Recortar / Mover foto</button></div>
+<div><label class="text-t-200 text-xs font-medium mb-1 block">Imagen Reverso <span class="text-gray-600">(QR o imagen)</span></label>
+<div class="pupload p-3 flex items-center gap-3" onclick="document.getElementById('fi-back').click()">
+<div id="bk-pc" class="w-12 h-12 rounded-lg overflow-hidden border-2 bg-black/30 flex items-center justify-center flex-shrink-0" style="border-color:var(--bdr)"><i id="bk-ic" class="fas fa-qrcode text-gray-500"></i><img id="bk-pv" class="w-full h-full object-cover hidden"></div>
+<div><p class="text-t-200 text-sm">Subir imagen/QR</p><p class="text-gray-600 text-xs">Si no, se genera QR auto</p></div></div>
+<input type="file" id="fi-back" accept="image/*" class="hidden" onchange="onBackPick(event)">
+<button type="button" id="btn-rmbk" onclick="rmBackImg()" class="hidden mt-1 text-red-400 text-xs"><i class="fas fa-trash-alt mr-1"></i>Quitar imagen</button></div>
+<div class="grid grid-cols-2 gap-3">
+<div class="col-span-2"><label class="text-t-200 text-xs font-medium mb-0.5 block">Nombre Completo *</label><input type="text" id="inp-nom" required class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Ej: Cristian Medina"></div>
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Sexo</label><input type="text" id="inp-sex" list="dl-sex" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Escribe o selecciona"><datalist id="dl-sex"><option value="Por Favor"><option value="Si Por Favor"><option value="Macho Alfa"><option value="Dama de Honor"><option value="Todos los Dias"><option value="Sin Especificar"></datalist></div>
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Especialidad</label><input type="text" id="inp-esp" list="dl-esp" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Escribe o selecciona"><datalist id="dl-esp"><option value="Tomar hasta beber"><option value="Catador Oficial"><option value="Filosofo del Bar"><option value="Cantinero Amateur"><option value="Sobreviviente"><option value="Creador de Caos"><option value="Paz Social"><option value="Animador Oficial"></datalist></div>
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Nombre Clave</label><input type="text" id="inp-apo" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Ej: El Jefe"></div>
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Domicilio</label><input type="text" id="inp-dom" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Ej: Calle Bar #1"></div>
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Estado Civil</label><input type="text" id="inp-eciv" list="dl-eciv" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Selecciona"><datalist id="dl-eciv"><option value="Soltero"><option value="Casado"><option value="Divorciado"><option value="Viudo"><option value="Complicado"><option value="En relacion toxica"><option value="Casado con el trago"><option value="Libre como el viento"></datalist></div>
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Debilidad</label><input type="text" id="inp-deb" list="dl-deb" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Escribe o selecciona"><datalist id="dl-deb"><option value="El tekila"><option value="Las rubias"><option value="Los morenos"><option value="La cerveza"><option value="El karaoke"><option value="La danza"><option value="El chiste facil"><option value="El picante"><option value="La madrugada"></datalist></div>
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Estado</label><select id="inp-est" class="w-full rounded-lg px-3 py-2 text-t-100 text-sm border cursor-pointer" style="background:var(--s1);border-color:var(--bdr)"><option value="Activo">Activo</option><option value="En Rehabilitación">En Rehabilitación</option><option value="Probation">Probation</option><option value="Leyenda">Leyenda</option><option value="Inactivo">Inactivo</option></select></div>
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Fecha de Ingreso</label><input type="date" id="inp-fing" class="w-full rounded-lg px-3 py-2 text-t-100 text-sm border cursor-pointer" style="background:var(--s1);border-color:var(--bdr)"></div>
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Fecha de Nacimiento *</label><input type="date" id="inp-fnac" required class="w-full rounded-lg px-3 py-2 text-t-100 text-sm border cursor-pointer" style="background:var(--s1);border-color:var(--bdr)"></div>
+<div class="col-span-2"><label class="text-t-200 text-xs font-medium mb-0.5 block">Cita Favorita</label><input type="text" id="inp-cit" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)" placeholder="Ej: Yo no bebo, solo cata"></div>
 </div>
+<div class="flex gap-3 pt-1"><button type="button" onclick="closeML('m')" class="flex-1 px-3 py-2 rounded-lg border text-gray-400 text-sm" style="border-color:var(--bdr)">Cancelar</button>
+<button type="submit" class="flex-1 btn-g px-3 py-2 rounded-lg text-sm"><i class="fas fa-save mr-1"></i><span id="btn-mt">Guardar</span></button></div>
+</form></div></div>
 
 <!-- MODAL: Cropper -->
-<div id="ml-crop" class="modal-ov fixed inset-0 z-[60] flex items-center justify-center p-4" style="background:rgba(0,0,0,.85)">
-    <div class="mbox rounded-2xl p-5 border" style="background:var(--s2);border-color:var(--bdr);max-width:400px">
-        <h3 class="font-cinzel font-bold text-sm text-t-100 mb-3 text-center">Recortar Fotografia</h3>
-        <div class="crop-area" id="crop-area">
-            <img id="crop-img" src="" alt="">
-            <div class="crop-overlay"><div class="crop-frame" id="crop-frame" style="width:120px;height:144px;top:88px;left:80px"></div></div>
-        </div>
-        <div class="flex items-center gap-3 mt-3">
-            <label class="text-gray-400 text-xs">Zoom</label>
-            <input type="range" id="crop-zoom" min="10" max="300" value="100" class="flex-1 accent-amber-500" oninput="updateCropZoom()">
-        </div>
-        <div class="flex gap-3 mt-4">
-            <button onclick="closeML('crop')" class="flex-1 px-3 py-2 rounded-lg border text-gray-400 text-sm" style="border-color:var(--bdr)">Cancelar</button>
-            <button onclick="confirmCrop()" class="flex-1 btn-g px-3 py-2 rounded-lg text-sm"><i class="fas fa-check mr-1"></i>Confirmar Recorte</button>
-        </div>
-    </div>
-</div>
+<div id="ml-crop" class="modal-ov fixed inset-0 z-[60] flex items-center justify-center p-4" style="background:rgba(0,0,0,.88)">
+<div class="mbox rounded-2xl p-5 border" style="background:var(--s2);border-color:var(--bdr);max-width:440px">
+<h3 class="font-cinzel font-bold text-sm text-t-100 mb-2 text-center">Ajustar Fotografia</h3>
+<p class="text-gray-400 text-xs text-center mb-3">Arrastra la imagen para posicionar. Usa el zoom para enfocar.</p>
+<div class="crop-wrap" id="crop-area">
+<img id="crop-img" src="" alt="">
+<div class="crop-frame" id="crop-frame" style="width:120px;height:144px;top:108px;left:90px"></div></div>
+<div class="flex items-center gap-3 mt-3"><label class="text-gray-400 text-xs whitespace-nowrap">Zoom</label>
+<input type="range" id="crop-zoom" min="20" max="400" value="100" class="flex-1 accent-amber-500" oninput="updateCropZoom()">
+<span id="crop-zoom-val" class="text-t-200 text-xs w-8 text-right">100%</span></div>
+<div class="flex gap-3 mt-4"><button onclick="closeML('crop')" class="flex-1 px-3 py-2 rounded-lg border text-gray-400 text-sm" style="border-color:var(--bdr)">Cancelar</button>
+<button onclick="confirmCrop()" class="flex-1 btn-g px-3 py-2 rounded-lg text-sm"><i class="fas fa-check mr-1"></i>Confirmar</button></div>
+</div></div>
 
 <!-- MODAL: Evento -->
 <div id="ml-e" class="modal-ov fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,.75)">
-    <div class="mbox w-full max-w-md rounded-2xl border overflow-hidden" style="background:linear-gradient(160deg,var(--s1),var(--s2));border-color:var(--bdr)">
-        <div class="flex items-center justify-between px-5 py-3 border-b" style="border-color:var(--bdr)">
-            <h2 id="ml-et" class="font-cinzel font-bold text-sm text-t-100">Nuevo Evento</h2>
-            <button onclick="closeML('e')" class="text-gray-500 hover:text-t-100"><i class="fas fa-times"></i></button>
-        </div>
-        <form id="frm-e" onsubmit="submitEvent(event)" class="p-5 space-y-3">
-            <input type="hidden" id="e-id">
-            <div><label class="text-t-200 text-xs font-medium mb-0.5 block">Imagen</label>
-                <div class="pupload p-2 flex items-center gap-2" onclick="document.getElementById('fi-evimg').click()">
-                    <div id="evi-pc" class="w-12 h-12 rounded-lg overflow-hidden border bg-black/30 flex items-center justify-center flex-shrink-0" style="border-color:var(--bdr)"><i id="evi-ic" class="fas fa-image text-gray-500"></i><img id="evi-pv" class="w-full h-full object-cover hidden"></div>
-                    <div><p class="text-t-200 text-xs">Subir imagen (opcional)</p></div>
-                </div><input type="file" id="fi-evimg" accept="image/*" class="hidden" onchange="onEvImgPick(event)">
-            </div>
-            <div><label class="text-t-200 text-xs font-medium mb-0.5 block">Titulo *</label><input type="text" id="inp-etit" required class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)"></div>
-            <div><label class="text-t-200 text-xs font-medium mb-0.5 block">Fecha</label><input type="date" id="inp-efec" class="w-full rounded-lg px-3 py-2 text-t-100 text-sm border cursor-pointer" style="background:var(--s1);border-color:var(--bdr)"></div>
-            <div><label class="text-t-200 text-xs font-medium mb-0.5 block">Descripcion</label><textarea id="inp-edesc" rows="2" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border resize-none" style="background:var(--s1);border-color:var(--bdr)"></textarea></div>
-            <div class="flex gap-3 pt-1">
-                <button type="button" onclick="closeML('e')" class="flex-1 px-3 py-2 rounded-lg border text-gray-400 text-sm" style="border-color:var(--bdr)">Cancelar</button>
-                <button type="submit" class="flex-1 btn-g px-3 py-2 rounded-lg text-sm"><i class="fas fa-save mr-1"></i>Guardar</button>
-            </div>
-        </form>
-    </div>
-</div>
+<div class="mbox w-full max-w-md rounded-2xl border overflow-hidden" style="background:linear-gradient(160deg,var(--s1),var(--s2));border-color:var(--bdr)">
+<div class="flex items-center justify-between px-5 py-3 border-b" style="border-color:var(--bdr)"><h2 id="ml-et" class="font-cinzel font-bold text-sm text-t-100">Nuevo Evento</h2><button onclick="closeML('e')" class="text-gray-500 hover:text-t-100"><i class="fas fa-times"></i></button></div>
+<form id="frm-e" onsubmit="submitEvent(event)" class="p-5 space-y-3"><input type="hidden" id="e-id">
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Imagen</label><div class="pupload p-2 flex items-center gap-2" onclick="document.getElementById('fi-evimg').click()"><div id="evi-pc" class="w-12 h-12 rounded-lg overflow-hidden border bg-black/30 flex items-center justify-center flex-shrink-0" style="border-color:var(--bdr)"><i id="evi-ic" class="fas fa-image text-gray-500"></i><img id="evi-pv" class="w-full h-full object-cover hidden"></div><div><p class="text-t-200 text-xs">Subir imagen (opcional)</p></div></div><input type="file" id="fi-evimg" accept="image/*" class="hidden" onchange="onEvImgPick(event)"></div>
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Titulo *</label><input type="text" id="inp-etit" required class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border" style="background:var(--s1);border-color:var(--bdr)"></div>
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Fecha</label><input type="date" id="inp-efec" class="w-full rounded-lg px-3 py-2 text-t-100 text-sm border cursor-pointer" style="background:var(--s1);border-color:var(--bdr)"></div>
+<div><label class="text-t-200 text-xs font-medium mb-0.5 block">Descripcion</label><textarea id="inp-edesc" rows="2" class="w-full rounded-lg px-3 py-2 text-t-100 placeholder:text-gray-600 focus:outline-none text-sm border resize-none" style="background:var(--s1);border-color:var(--bdr)"></textarea></div>
+<div class="flex gap-3 pt-1"><button type="button" onclick="closeML('e')" class="flex-1 px-3 py-2 rounded-lg border text-gray-400 text-sm" style="border-color:var(--bdr)">Cancelar</button><button type="submit" class="flex-1 btn-g px-3 py-2 rounded-lg text-sm"><i class="fas fa-save mr-1"></i>Guardar</button></div>
+</form></div></div>
 
 <!-- MODAL: Carnet -->
 <div id="ml-carnet" class="modal-ov fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto" style="background:rgba(0,0,0,.88)">
-    <div class="mbox flex flex-col items-center gap-4 py-5 max-w-[1200px] w-full">
-        <h2 class="font-cinzel font-bold text-lg text-t-100">Carnet de Integrante</h2>
-        <!-- Toggle anverso/reverso -->
-        <div class="flex gap-2">
-            <button onclick="showCarnetSide('front')" id="cside-f" class="px-4 py-1.5 rounded-lg text-sm font-medium bg-t-300/15 text-t-200 border border-t-300/25">Anverso</button>
-            <button onclick="showCarnetSide('back')" id="cside-b" class="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 border border-transparent hover:text-t-200">Reverso</button>
-        </div>
-        <div class="rounded-xl overflow-hidden shadow-2xl border" style="border-color:var(--bdr);box-shadow:0 0 40px rgba(212,160,23,.08)">
-            <div id="carnet-front" class="cw"></div>
-            <div id="carnet-back" class="cw hidden"></div>
-        </div>
-        <div class="flex flex-wrap gap-2 justify-center">
-            <button onclick="dlCarnet('front')" class="btn-g px-4 py-2 rounded-lg text-sm flex items-center gap-1.5"><i class="fas fa-download"></i>Anverso PNG</button>
-            <button onclick="dlCarnet('back')" class="btn-g px-4 py-2 rounded-lg text-sm flex items-center gap-1.5"><i class="fas fa-download"></i>Reverso PNG</button>
-            <button onclick="dlCarnet('both')" class="px-4 py-2 rounded-lg text-sm border text-t-200 hover:bg-white/5 flex items-center gap-1.5" style="border-color:var(--bdr)"><i class="fas fa-file-image"></i>Ambos</button>
-            <button onclick="closeML('carnet')" class="px-4 py-2 rounded-lg border text-gray-400 text-sm hover:bg-white/5" style="border-color:var(--bdr)">Cerrar</button>
-        </div>
-    </div>
-</div>
+<div class="mbox flex flex-col items-center gap-4 py-5 max-w-[1200px] w-full">
+<h2 class="font-cinzel font-bold text-lg text-t-100">Carnet de Integrante</h2>
+<div class="flex gap-2">
+<button onclick="showCS('front')" id="cside-f" class="px-4 py-1.5 rounded-lg text-sm font-medium bg-t-300/15 text-t-200 border border-t-300/25">Anverso</button>
+<button onclick="showCS('back')" id="cside-b" class="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 border border-transparent hover:text-t-200">Reverso</button></div>
+<div class="rounded-xl overflow-hidden shadow-2xl border" style="border-color:var(--bdr);box-shadow:0 0 40px rgba(212,160,23,.08)">
+<div id="carnet-front" class="cw"></div><div id="carnet-back" class="cw hidden"></div></div>
+<div class="flex flex-wrap gap-2 justify-center">
+<button onclick="dlCarnet('front')" class="btn-g px-4 py-2 rounded-lg text-sm flex items-center gap-1.5"><i class="fas fa-download"></i>Anverso PNG</button>
+<button onclick="dlCarnet('back')" class="btn-g px-4 py-2 rounded-lg text-sm flex items-center gap-1.5"><i class="fas fa-download"></i>Reverso PNG</button>
+<button onclick="dlCarnet('both')" class="px-4 py-2 rounded-lg text-sm border text-t-200 hover:bg-white/5 flex items-center gap-1.5" style="border-color:var(--bdr)"><i class="fas fa-file-image"></i>Ambos</button>
+<button onclick="closeML('carnet')" class="px-4 py-2 rounded-lg border text-gray-400 text-sm" style="border-color:var(--bdr)">Cerrar</button>
+</div></div></div>
 
 <!-- MODAL: Delete -->
 <div id="ml-del" class="modal-ov fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,.75)">
-    <div class="mbox w-full max-w-sm rounded-2xl p-5 text-center border" style="background:var(--s2);border-color:var(--bdr)">
-        <div class="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-3"><i class="fas fa-exclamation-triangle text-red-400"></i></div>
-        <p id="del-msg" class="text-t-100 text-sm mb-4"></p>
-        <div class="flex gap-3">
-            <button onclick="closeML('del')" class="flex-1 px-3 py-2 rounded-lg border text-gray-400 text-sm" style="border-color:var(--bdr)">Cancelar</button>
-            <button onclick="confirmDel()" class="flex-1 px-3 py-2 rounded-lg bg-red-600 text-white font-semibold text-sm hover:bg-red-700">Eliminar</button>
-        </div>
-    </div>
-</div>
+<div class="mbox w-full max-w-sm rounded-2xl p-5 text-center border" style="background:var(--s2);border-color:var(--bdr)">
+<div class="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-3"><i class="fas fa-exclamation-triangle text-red-400"></i></div>
+<p id="del-msg" class="text-t-100 text-sm mb-4"></p>
+<div class="flex gap-3"><button onclick="closeML('del')" class="flex-1 px-3 py-2 rounded-lg border text-gray-400 text-sm" style="border-color:var(--bdr)">Cancelar</button>
+<button onclick="confirmDel()" class="flex-1 px-3 py-2 rounded-lg bg-red-600 text-white font-semibold text-sm hover:bg-red-700">Eliminar</button></div></div></div>
 
-<!-- Contenedor oculto para PDF -->
-<div id="pdf-render" style="position:absolute;left:-9999px;top:0;"></div>
+<div id="pdf-render" style="position:absolute;left:-9999px;top:0"></div>
 
 <script>
 // ============================================================
-// BAR TEKILA & ASOCIADOS v3
-// ============================================================
-
-const FB_CONFIG={apiKey:"AIzaSyAux2n7a__g1CLd3nI_7HqITaBIo4ZYUQw",authDomain:"bar-tekila.firebaseapp.com",projectId:"bar-tekila",storageBucket:"bar-tekila.firebasestorage.app",messagingSenderId:"996991755170",appId:"1:996991755170:web:3fc48152223514968408fb",measurementId:"G-QJG964KGT2"};
+const FB_CFG={apiKey:"AIzaSyAux2n7a__g1CLd3nI_7HqITaBIo4ZYUQw",authDomain:"bar-tekila.firebaseapp.com",projectId:"bar-tekila",storageBucket:"bar-tekila.firebasestorage.app",messagingSenderId:"996991755170",appId:"1:996991755170:web:3fc48152223514968408fb"};
 const LOGO='https://z-cdn-media.chatglm.cn/files/0622d5e2-aad1-4bec-8dc3-396f867a0083.png?auth_key=1880213657-9c06d06a198449ce833b0462d8e57c3d-0-940c95341292d56515cbd0324b98ff5b';
-
-let members=[],events=[],currentUser=null,db=null;
-let editMId=null,editEId=null,delTarget=null;
+let members=[],events=[],currentUser=null,db=null,editMId=null,editEId=null,delTarget=null;
 let tmpPhoto=null,tmpOrigPhoto=null,tmpBack=null,tmpEvImg=null;
 
-// --- Firebase ---
-function initFB(){
-    try{
-        if(!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
-        db=firebase.firestore();
-        firebase.auth().onAuthStateChanged(u=>{currentUser=u;updateAuth()});
-        db.collection('members').onSnapshot(s=>{members=s.docs.map(d=>({id:d.id,...d.data()}));renderAll()},e=>{console.error(e);loadLocal();renderAll()});
-        db.collection('events').orderBy('fecha','desc').onSnapshot(s=>{events=s.docs.map(d=>({id:d.id,...d.data()}));renderAll()},e=>{console.error(e);loadLocal();renderAll()});
-    }catch(e){console.error(e);loadLocal();renderAll()}
-}
+function initFB(){try{if(!firebase.apps.length)firebase.initializeApp(FB_CFG);db=firebase.firestore();firebase.auth().onAuthStateChanged(u=>{currentUser=u;updateAuth()});db.collection('members').onSnapshot(s=>{members=s.docs.map(d=>({id:d.id,...d.data()}));renderAll()},e=>{console.error(e);loadLocal();renderAll()});db.collection('events').orderBy('fecha','desc').onSnapshot(s=>{events=s.docs.map(d=>({id:d.id,...d.data()}));renderAll()},e=>{console.error(e);loadLocal();renderAll()})}catch(e){console.error(e);loadLocal();renderAll()}}
 function loadLocal(){try{members=JSON.parse(localStorage.getItem('bt_m')||'[]');events=JSON.parse(localStorage.getItem('bt_e')||'[]')}catch{members=[];events=[]}}
 function saveLocal(){try{localStorage.setItem('bt_m',JSON.stringify(members));localStorage.setItem('bt_e',JSON.stringify(events))}catch{}}
-
-// --- Auth ---
 function signIn(){firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(r=>toast('Bienvenido, '+r.user.displayName,'ok')).catch(e=>toast('Error: '+e.message,'err'))}
 function signOut(){firebase.auth().signOut().then(()=>toast('Sesión cerrada','info'))}
-function updateAuth(){
-    const o=document.getElementById('auth-out'),i=document.getElementById('auth-in'),lr=document.getElementById('login-req'),ap=document.getElementById('admin-pg');
-    if(currentUser){o.classList.add('hidden');i.classList.remove('hidden');i.classList.add('flex');document.getElementById('auth-av').src=currentUser.photoURL||'';document.getElementById('auth-nm').textContent=currentUser.displayName||'';lr.classList.add('hidden');ap.classList.remove('hidden')}
-    else{o.classList.remove('hidden');i.classList.add('hidden');i.classList.remove('flex');lr.classList.remove('hidden');ap.classList.add('hidden')}
-}
-
-// --- Tabs ---
-function switchTab(t){
-    document.getElementById('pg-inicio').classList.toggle('hidden',t!=='inicio');
-    document.getElementById('pg-registro').classList.toggle('hidden',t!=='registro');
-    document.getElementById('tab-inicio').classList.toggle('on',t==='inicio');
-    document.getElementById('tab-registro').classList.toggle('on',t==='registro');
-    document.getElementById('tab-inicio').classList.toggle('text-gray-500',t!=='inicio');
-    document.getElementById('tab-registro').classList.toggle('text-gray-500',t!=='registro');
-}
-function switchSub(t){
-    document.getElementById('adm-m').classList.toggle('hidden',t!=='m');
-    document.getElementById('adm-e').classList.toggle('hidden',t!=='e');
-    document.getElementById('btn-add-m').classList.toggle('hidden',t!=='m');
-    document.getElementById('btn-add-e').classList.toggle('hidden',t!=='e');
-    const mb=document.getElementById('st-m'),ev=document.getElementById('st-e');
-    if(t==='m'){mb.className='px-3 py-1.5 rounded-lg text-sm font-medium bg-t-300/10 text-t-200 border border-t-300/20 transition-all';ev.className='px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-t-200 border border-transparent transition-all'}
-    else{ev.className='px-3 py-1.5 rounded-lg text-sm font-medium bg-q-400/10 text-q-400 border border-q-400/20 transition-all';mb.className='px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-t-200 border border-transparent transition-all'}
-}
-
-// --- Utilidades ---
-function gid(){return 'bt_'+Date.now().toString(36)+Math.random().toString(36).substr(2,5)}
+function updateAuth(){const o=document.getElementById('auth-out'),i=document.getElementById('auth-in'),lr=document.getElementById('login-req'),ap=document.getElementById('admin-pg');if(currentUser){o.classList.add('hidden');i.classList.remove('hidden');i.classList.add('flex');document.getElementById('auth-av').src=currentUser.photoURL||'';document.getElementById('auth-nm').textContent=currentUser.displayName||'';lr.classList.add('hidden');ap.classList.remove('hidden')}else{o.classList.remove('hidden');i.classList.add('hidden');i.classList.remove('flex');lr.classList.remove('hidden');ap.classList.add('hidden')}}
+function switchTab(t){document.getElementById('pg-inicio').classList.toggle('hidden',t!=='inicio');document.getElementById('pg-registro').classList.toggle('hidden',t!=='registro');document.getElementById('tab-inicio').classList.toggle('on',t==='inicio');document.getElementById('tab-registro').classList.toggle('on',t==='registro');document.getElementById('tab-inicio').classList.toggle('text-gray-500',t!=='inicio');document.getElementById('tab-registro').classList.toggle('text-gray-500',t!=='registro')}
+function switchSub(t){document.getElementById('adm-m').classList.toggle('hidden',t!=='m');document.getElementById('adm-e').classList.toggle('hidden',t!=='e');document.getElementById('btn-add-m').classList.toggle('hidden',t!=='m');document.getElementById('btn-add-e').classList.toggle('hidden',t!=='e');const mb=document.getElementById('st-m'),ev=document.getElementById('st-e');if(t==='m'){mb.className='px-3 py-1.5 rounded-lg text-sm font-medium bg-t-300/10 text-t-200 border border-t-300/20 transition-all';ev.className='px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-t-200 border border-transparent transition-all'}else{ev.className='px-3 py-1.5 rounded-lg text-sm font-medium bg-q-400/10 text-q-400 border border-q-400/20 transition-all';mb.className='px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-t-200 border border-transparent transition-all'}}
+function gid(){return'bt_'+Date.now().toString(36)+Math.random().toString(36).substr(2,5)}
 function nextNum(){if(!members.length)return'BT-001';const n=members.map(m=>parseInt((m.numeroSocio||'').replace('BT-',''),10)).filter(v=>!isNaN(v));return'BT-'+String(Math.max(0,...n)+1).padStart(3,'0')}
 function fmtD(d){if(!d)return'--/--/----';return new Date(d+'T12:00:00').toLocaleDateString('es-BO',{day:'2-digit',month:'2-digit',year:'numeric'})}
-function sdotCls(s){return{Activo:'activo',Leyenda:'leyenda','En Rehabilitación':'rehab',Probation:'probation',Inactivo:'inactivo'}[s]||'inactivo'}
+function sdotCls(s){return{Activo:'Activo',Leyenda:'Leyenda','En Rehabilitación':'rehab',Probation:'Probation',Inactivo:'Inactivo'}[s]||'Inactivo'}
 function genQR(txt){try{return new QRious({value:txt,size:300,level:'M',background:'#f5e6c8',foreground:'#2d1b0a'}).toDataURL()}catch{return null}}
 function resizeImg(url,mw,mh){return new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');let w=i.width,h=i.height;if(w>mw){h=h*(mw/w);w=mw}if(h>mh){w=w*(mh/h);h=mh}c.width=Math.max(1,Math.round(w));c.height=Math.max(1,Math.round(h));c.getContext('2d').drawImage(i,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.75))};i.src=url})}
+function isBirthday(f){if(!f)return false;const t=new Date(),b=new Date(f+'T12:00:00');return b.getMonth()===t.getMonth()&&b.getDate()===t.getDate()}
+function daysUntilBday(f){if(!f)return 999;const t=new Date(),b=new Date(f+'T12:00:00');let n=new Date(t.getFullYear(),b.getMonth(),b.getDate());if(n<t)n.setFullYear(n.getFullYear()+1);return Math.ceil((n-t)/(864e5))}
+function bdayAge(f){if(!f)return'?';const t=new Date(),b=new Date(f+'T12:00:00');let a=t.getFullYear()-b.getFullYear();const m=t.getMonth()-b.getMonth();if(m<0||(m===0&&t.getDate()<b.getDate()))a--;return a}
 
-function isBirthday(fechaNac){
-    if(!fechaNac)return false;
-    const today=new Date(),bn=new Date(fechaNac+'T12:00:00');
-    return bn.getMonth()===today.getMonth()&&bn.getDate()===today.getDate();
-}
-function daysUntilBirthday(fechaNac){
-    if(!fechaNac)return 999;
-    const t=new Date(),b=new Date(fechaNac+'T12:00:00');
-    let next=new Date(t.getFullYear(),b.getMonth(),b.getDate());
-    if(next<t)next.setFullYear(next.getFullYear()+1);
-    return Math.ceil((next-t)/(1000*60*60*24));
-}
-function birthdayAge(fechaNac){
-    if(!fechaNac)return'?';
-    const t=new Date(),b=new Date(fechaNac+'T12:00:00');
-    let age=t.getFullYear()-b.getFullYear();
-    const m=t.getMonth()-b.getMonth();
-    if(m<0||(m===0&&t.getDate()<b.getDate()))age--;
-    return age;
-}
+// CRUD
+async function saveM(d){if(db){try{if(d.id&&d.id.startsWith('bt_'))await db.collection('members').add(d);else await db.collection('members').doc(d.id).set(d);return}catch(e){console.error(e)}}const i=members.findIndex(m=>m.id===d.id);if(i>=0)members[i]=d;else members.push(d);saveLocal()}
+async function delM(id){if(db){try{await db.collection('members').doc(id).delete();return}catch(e){console.error(e)}}members=members.filter(m=>m.id!==id);saveLocal()}
+async function saveEv(d){if(db){try{if(d.id&&d.id.startsWith('ev_'))await db.collection('events').add(d);else await db.collection('events').doc(d.id).set(d);return}catch(e){console.error(e)}}const i=events.findIndex(e=>e.id===d.id);if(i>=0)events[i]=d;else events.push(d);saveLocal()}
+async function delEv(id){if(db){try{await db.collection('events').doc(id).delete();return}catch(e){console.error(e)}}events=events.filter(e=>e.id!==id);saveLocal()}
 
-// --- CRUD ---
-async function saveM(data){
-    if(db){try{if(data.id&&data.id.startsWith('bt_'))await db.collection('members').add(data);else await db.collection('members').doc(data.id).set(data);return}catch(e){console.error(e)}}
-    const idx=members.findIndex(m=>m.id===data.id);if(idx>=0)members[idx]=data;else members.push(data);saveLocal();
-}
-async function delM(id){
-    if(db){try{await db.collection('members').doc(id).delete();return}catch(e){console.error(e)}}
-    members=members.filter(m=>m.id!==id);saveLocal();
-}
-async function saveEv(data){
-    if(db){try{if(data.id&&data.id.startsWith('ev_'))await db.collection('events').add(data);else await db.collection('events').doc(data.id).set(data);return}catch(e){console.error(e)}}
-    const idx=events.findIndex(e=>e.id===data.id);if(idx>=0)events[idx]=data;else events.push(data);saveLocal();
-}
-async function delEv(id){
-    if(db){try{await db.collection('events').doc(id).delete();return}catch(e){console.error(e)}}
-    events=events.filter(e=>e.id!==id);saveLocal();
-}
-
-// --- Render ---
+// RENDER
 function renderAll(){renderInicio();renderAdmin()}
 function renderInicio(){
-    // Stats
-    document.getElementById('s-total').textContent=members.length;
-    // Search
-    const q=(document.getElementById('sinput').value||'').toLowerCase().trim();
-    let fm=members.filter(m=>!q||[m.nombre,m.apodo,m.especialidad,m.numeroSocio].some(v=>(v||'').toLowerCase().includes(q)));
-    // Cumpleaños
-    const bdays=members.filter(m=>m.fechaNacimiento).map(m=>({...m,_d:daysUntilBirthday(m.fechaNacimiento)})).sort((a,b)=>a._d-b._d).filter(m=>m._d<=7);
-    const bsec=document.getElementById('bday-section'),bgrid=document.getElementById('bday-grid');
-    if(bdays.length){bsec.classList.remove('hidden');bgrid.innerHTML=bdays.map(m=>{
-        const ini=(m.nombre||'??').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-        const ph=m.foto?`<img src="${m.foto}" class="w-full h-full object-cover">`:`<span class="text-sm font-bold text-t-300">${ini}</span>`;
-        const isToday=isBirthday(m.fechaNac);
-        return`<div class="flex items-center gap-3 px-4 py-3 rounded-xl border flex-shrink-0 min-w-[200px]" style="background:linear-gradient(135deg,rgba(232,93,58,.08),var(--s2));border-color:rgba(232,93,58,.2)">
-            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-c-400/40 bg-black/30 flex items-center justify-center flex-shrink-0">${ph}</div>
-            <div><p class="text-t-100 text-sm font-medium">${m.nombre||'?'}${m.apodo?' "'+m.apodo+'"':''}</p>
-            <p class="text-xs ${isToday?'text-c-400 font-semibold':'text-gray-400'}">${isToday?'Hoy cumple '+birthdayAge(m.fechaNacimiento)+' anos!':m._d===1?'Manana cumple anos':'En '+m._d+' dias'}</p></div></div>`
-    }).join('')}else{bsec.classList.add('hidden')}
-    // Eventos
-    const egrid=document.getElementById('ev-grid'),eempty=document.getElementById('ev-empty');
-    if(events.length){eempty.classList.add('hidden');egrid.innerHTML=events.map(ev=>{
-        const im=ev.imagen?`<img src="${ev.imagen}" class="w-full h-28 object-cover">`:`<div class="w-full h-28 flex items-center justify-center" style="background:linear-gradient(135deg,var(--s1),var(--s3))"><i class="fas fa-glass-cheers text-2xl text-gray-600"></i></div>`;
-        return`<div class="ecard">${im}<div class="p-3"><h3 class="font-semibold text-t-100 text-sm mb-0.5">${ev.titulo||''}</h3>${ev.fecha?`<p class="text-gray-400 text-xs"><i class="fas fa-calendar-day mr-1"></i>${fmtD(ev.fecha)}</p>`:''}${ev.descripcion?`<p class="text-gray-500 text-xs mt-1 line-clamp-2">${ev.descripcion}</p>`:''}</div></div>`
-    }).join('')}else{egrid.innerHTML='';eempty.classList.remove('hidden')}
-    // Miembros
-    const mgrid=document.getElementById('m-grid'),mempty=document.getElementById('m-empty');
-    if(!fm.length&&!members.length){mgrid.innerHTML='';mempty.classList.remove('hidden');return}
-    mempty.classList.add('hidden');
-    if(!fm.length){mgrid.innerHTML='<div class="col-span-full text-center py-8 text-gray-600"><i class="fas fa-search text-xl mb-2 block"></i>Sin resultados</div>';return}
-    mgrid.innerHTML=fm.map((m,i)=>{
-        const sc=sdotCls(m.estado),ini=(m.nombre||'??').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-        const ph=m.foto?`<img src="${m.foto}" class="w-full h-full object-cover">`:`<span class="text-lg font-bold text-t-300">${ini}</span>`;
-        return`<div class="mcard p-4 fup" style="animation-delay:${i*.04}s">
-            <div class="flex items-start gap-3 mb-3">
-                <div class="w-12 h-12 rounded-full overflow-hidden border-2 bg-black/30 flex items-center justify-center flex-shrink-0" style="border-color:var(--bdr)">${ph}</div>
-                <div class="flex-1 min-w-0"><div class="flex items-center gap-2"><h3 class="font-semibold text-t-100 truncate text-sm">${m.nombre||'?'}</h3><span class="sdot ${sc}"></span></div>
-                ${m.apodo?`<p class="text-gray-400 text-xs">"${m.apodo}"</p>`:''}<p class="text-gray-600 text-[10px] mt-0.5">${m.numeroSocio||''}</p></div>
-            </div>
-            <div class="space-y-0.5 text-xs mb-3 text-gray-300">
-                <p><i class="fas fa-star text-t-500 w-3 text-center text-[10px]"></i> ${m.especialidad||'-'}</p>
-                <p><i class="fas fa-venus-mars text-t-500 w-3 text-center text-[10px]"></i> ${m.sexo||'-'}</p>
-                ${m.fechaNacimiento?`<p><i class="fas fa-birthday-cake text-c-400 w-3 text-center text-[10px]"></i> ${fmtD(m.fechaNacimiento)}</p>`:''}
-            </div>
-            <button onclick="viewCarnet('${m.id}')" class="w-full py-2 rounded-lg bg-t-300/10 text-t-200 text-xs hover:bg-t-300/20 transition-colors font-medium"><i class="fas fa-id-card mr-1"></i>Ver Carnet</button>
-        </div>`
-    }).join('')
-}
+document.getElementById('s-total').textContent=members.length;
+const q=(document.getElementById('sinput').value||'').toLowerCase().trim();
+let fm=members.filter(m=>!q||[m.nombre,m.apodo,m.especialidad,m.numeroSocio,m.domicilio,m.debilidad].some(v=>(v||'').toLowerCase().includes(q)));
+// Eventos + Cumpleaños
+const egrid=document.getElementById('ev-grid'),eempty=document.getElementById('ev-empty');
+let evCards=[];
+// Cumpleaños hoy
+const bdayToday=members.filter(m=>isBirthday(m.fechaNacimiento));
+bdayToday.forEach(m=>{const ini=(m.nombre||'??').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();const ph=m.foto?`<img src="${m.foto}" class="w-full h-full object-cover">`:`<span class="text-sm font-bold text-c-400">${ini}</span>`;
+evCards.push(`<div class="ecard border-c-400/30" style="background:linear-gradient(145deg,rgba(232,93,58,.1),var(--s2))"><div class="p-4"><div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-full overflow-hidden border-2 border-c-400/50 bg-black/30 flex items-center justify-center">${ph}</div><div><p class="text-c-400 font-bold text-sm"><i class="fas fa-birthday-cake mr-1"></i>Hoy es su Cumpleanos!</p><p class="text-t-100 font-semibold">${m.nombre||'?'}${m.apodo?' "'+m.apodo+'"':''}</p></div></div><p class="text-gray-400 text-xs">Hoy cumple ${bdayAge(m.fechaNacimiento)} anos. Felicidades!</p></div></div>`)});
+// Proximo cumpleaños (no hoy, dentro de 30 dias)
+const nextBdays=members.filter(m=>m.fechaNacimiento&&!isBirthday(m.fechaNacimiento)&&daysUntilBday(m.fechaNacimiento)<=30).map(m=>({...m,_d:daysUntilBday(m.fechaNacimiento)})).sort((a,b)=>a._d-b._d);
+nextBdays.forEach(m=>{const ini=(m.nombre||'??').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();const ph=m.foto?`<img src="${m.foto}" class="w-full h-full object-cover">`:`<span class="text-xs font-bold text-t-300">${ini}</span>`;
+evCards.push(`<div class="ecard" style="border-color:rgba(212,160,23,.15)"><div class="p-3 flex items-center gap-3"><div class="w-8 h-8 rounded-full overflow-hidden border border-t-500/30 bg-black/30 flex items-center justify-center flex-shrink-0">${ph}</div><div><p class="text-t-200 text-xs font-medium"><i class="fas fa-gift text-t-400 mr-1 text-[10px]"></i>${m.nombre||'?'}${m.apodo?' "'+m.apodo+'"':''}</p><p class="text-gray-500 text-[10px]">Cumple en ${m._d} dia${m._d!==1?'s':''} · ${fmtD(m.fechaNacimiento)}</p></div></div></div>`)});
+// Eventos normales
+events.forEach(ev=>{const im=ev.imagen?`<img src="${ev.imagen}" class="w-full h-28 object-cover">`:`<div class="w-full h-28 flex items-center justify-center" style="background:linear-gradient(135deg,var(--s1),var(--s3))"><i class="fas fa-glass-cheers text-2xl text-gray-600"></i></div>`;
+evCards.push(`<div class="ecard">${im}<div class="p-3"><h3 class="font-semibold text-t-100 text-sm mb-0.5">${ev.titulo||''}</h3>${ev.fecha?`<p class="text-gray-400 text-xs"><i class="fas fa-calendar-day mr-1"></i>${fmtD(ev.fecha)}</p>`:''}${ev.descripcion?`<p class="text-gray-500 text-xs mt-1 line-clamp-2">${ev.descripcion}</p>`:''}</div></div>`)});
+if(!evCards.length){egrid.innerHTML='';eempty.classList.remove('hidden')}else{egrid.innerHTML=evCards.join('');eempty.classList.add('hidden')}
+// Miembros
+const mgrid=document.getElementById('m-grid'),mempty=document.getElementById('m-empty');
+if(!fm.length&&!members.length){mgrid.innerHTML='';mempty.classList.remove('hidden');return}mempty.classList.add('hidden');
+if(!fm.length){mgrid.innerHTML='<div class="col-span-full text-center py-8 text-gray-600"><i class="fas fa-search text-xl mb-2 block"></i>Sin resultados</div>';return}
+mgrid.innerHTML=fm.map((m,i)=>{const sc=sdotCls(m.estado),ini=(m.nombre||'??').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();const ph=m.foto?`<img src="${m.foto}" class="w-full h-full object-cover">`:`<span class="text-lg font-bold text-t-300">${ini}</span>`;const isBd=isBirthday(m.fechaNacimiento);
+return`<div class="mcard p-4 fup ${isBd?'border-c-400/30':''}" style="animation-delay:${i*.04}s;${isBd?'background:linear-gradient(145deg,rgba(232,93,58,.06),var(--s2))':''}">
+<div class="flex items-start gap-3 mb-3"><div class="w-12 h-12 rounded-full overflow-hidden border-2 bg-black/30 flex items-center justify-center flex-shrink-0" style="border-color:${isBd?'rgba(232,93,58,.4)':'var(--bdr)'}">${ph}</div>
+<div class="flex-1 min-w-0"><div class="flex items-center gap-2"><h3 class="font-semibold text-t-100 truncate text-sm">${m.nombre||'?'}</h3><span class="sdot ${sc}"></span>${isBd?'<i class="fas fa-birthday-cake text-c-400 text-xs"></i>':''}</div>
+ ${m.apodo?`<p class="text-gray-400 text-xs">"${m.apodo}"</p>`:''}<p class="text-gray-600 text-[10px] mt-0.5">${m.numeroSocio||''}</p></div></div>
+<div class="space-y-0.5 text-xs mb-3 text-gray-300"><p><i class="fas fa-star text-t-500 w-3 text-center text-[10px]"></i> ${m.especialidad||'-'}</p><p><i class="fas fa-venus-mars text-t-500 w-3 text-center text-[10px]"></i> ${m.sexo||'-'}</p></div>
+<button onclick="viewCarnet('${m.id}')" class="w-full py-2 rounded-lg bg-t-300/10 text-t-200 text-xs hover:bg-t-300/20 transition-colors font-medium"><i class="fas fa-id-card mr-1"></i>Ver Carnet</button></div>`}).join('')}
 
-function renderAdmin(){
-    const mg=document.getElementById('adm-m'),eg=document.getElementById('adm-e');
-    if(!mg)return;
-    // Miembros
-    if(!members.length){mg.innerHTML='<div class="text-center py-10 text-gray-600"><i class="fas fa-user-plus text-xl mb-2 block"></i>Sin integrantes</div>'}
-    else{mg.innerHTML='<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">'+members.map(m=>{
-        const sc=sdotCls(m.estado),ini=(m.nombre||'??').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-        const ph=m.foto?`<img src="${m.foto}" class="w-full h-full object-cover">`:`<span class="text-sm font-bold text-t-300">${ini}</span>`;
-        return`<div class="mcard p-3"><div class="flex items-start gap-2 mb-2"><div class="w-10 h-10 rounded-full overflow-hidden border bg-black/30 flex items-center justify-center flex-shrink-0" style="border-color:var(--bdr)">${ph}</div>
-        <div class="flex-1 min-w-0"><div class="flex items-center gap-1.5"><h3 class="font-semibold text-t-100 truncate text-sm">${m.nombre||'?'}</h3><span class="sdot ${sc}"></span></div><p class="text-gray-500 text-[10px]">${m.numeroSocio||''} ${m.apodo?'· "'+m.apodo+'"':''}</p></div></div>
-        <div class="text-[11px] text-gray-400 mb-2 space-y-0.5"><p>Esp: ${m.especialidad||'-'}</p><p>Sexo: ${m.sexo||'-'}</p></div>
-        <div class="flex gap-1.5"><button onclick="editMember('${m.id}')" class="flex-1 py-1.5 rounded-md text-xs text-gray-300 hover:bg-white/5" style="background:var(--s1)"><i class="fas fa-pen"></i></button>
-        <button onclick="viewCarnet('${m.id}')" class="flex-1 py-1.5 rounded-md text-xs text-t-200 bg-t-300/10 hover:bg-t-300/20"><i class="fas fa-id-card"></i></button>
-        <button onclick="openDel('member','${m.id}','${(m.nombre||'').replace(/'/g,"\\'")}')" class="flex-1 py-1.5 rounded-md text-xs text-red-400 bg-red-500/10 hover:bg-red-500/20"><i class="fas fa-trash"></i></button></div></div>`
-    }).join('')+'</div>'}
-    // Eventos
-    if(!events.length){eg.innerHTML='<div class="text-center py-10 text-gray-600"><i class="fas fa-calendar-plus text-xl mb-2 block"></i>Sin eventos</div>'}
-    else{eg.innerHTML='<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">'+events.map(ev=>{
-        const im=ev.imagen?`<img src="${ev.imagen}" class="w-full h-20 object-cover rounded-lg mb-2">`:'';
-        return`<div class="mcard p-3">${im}<h3 class="font-semibold text-t-100 text-sm mb-0.5">${ev.titulo||''}</h3>${ev.fecha?`<p class="text-gray-400 text-xs">${fmtD(ev.fecha)}</p>`:''}
-        <div class="flex gap-1.5 mt-2"><button onclick="editEvent('${ev.id}')" class="flex-1 py-1.5 rounded-md text-xs text-gray-300 hover:bg-white/5" style="background:var(--s1)"><i class="fas fa-pen"></i></button>
-        <button onclick="openDel('event','${ev.id}','${(ev.titulo||'').replace(/'/g,"\\'")}')" class="flex-1 py-1.5 rounded-md text-xs text-red-400 bg-red-500/10 hover:bg-red-500/20"><i class="fas fa-trash"></i></button></div></div>`
-    }).join('')+'</div>'}
-}
+function renderAdmin(){const mg=document.getElementById('adm-m'),eg=document.getElementById('adm-e');if(!mg)return;
+if(!members.length)mg.innerHTML='<div class="text-center py-10 text-gray-600"><i class="fas fa-user-plus text-xl mb-2 block"></i>Sin integrantes</div>';
+else mg.innerHTML='<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">'+members.map(m=>{const sc=sdotCls(m.estado),ini=(m.nombre||'??').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();const ph=m.foto?`<img src="${m.foto}" class="w-full h-full object-cover">`:`<span class="text-sm font-bold text-t-300">${ini}</span>`;
+return`<div class="mcard p-3"><div class="flex items-start gap-2 mb-2"><div class="w-10 h-10 rounded-full overflow-hidden border bg-black/30 flex items-center justify-center flex-shrink-0" style="border-color:var(--bdr)">${ph}</div><div class="flex-1 min-w-0"><div class="flex items-center gap-1.5"><h3 class="font-semibold text-t-100 truncate text-sm">${m.nombre||'?'}</h3><span class="sdot ${sc}"></span></div><p class="text-gray-500 text-[10px]">${m.numeroSocio||''} ${m.apodo?'· "'+m.apodo+'"':''}</p></div></div><div class="text-[11px] text-gray-400 mb-2 space-y-0.5"><p>Esp: ${m.especialidad||'-'}</p><p>Nac: ${fmtD(m.fechaNacimiento)}</p></div><div class="flex gap-1.5"><button onclick="editMember('${m.id}')" class="flex-1 py-1.5 rounded-md text-xs text-gray-300 hover:bg-white/5" style="background:var(--s1)"><i class="fas fa-pen"></i></button><button onclick="viewCarnet('${m.id}')" class="flex-1 py-1.5 rounded-md text-xs text-t-200 bg-t-300/10 hover:bg-t-300/20"><i class="fas fa-id-card"></i></button><button onclick="openDel('member','${m.id}','${(m.nombre||'').replace(/'/g,"\\'")}')" class="flex-1 py-1.5 rounded-md text-xs text-red-400 bg-red-500/10 hover:bg-red-500/20"><i class="fas fa-trash"></i></button></div></div>`}).join('')+'</div>';
+if(!events.length)eg.innerHTML='<div class="text-center py-10 text-gray-600"><i class="fas fa-calendar-plus text-xl mb-2 block"></i>Sin eventos</div>';
+else eg.innerHTML='<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">'+events.map(ev=>{const im=ev.imagen?`<img src="${ev.imagen}" class="w-full h-20 object-cover rounded-lg mb-2">`:'';return`<div class="mcard p-3">${im}<h3 class="font-semibold text-t-100 text-sm mb-0.5">${ev.titulo||''}</h3>${ev.fecha?`<p class="text-gray-400 text-xs">${fmtD(ev.fecha)}</p>`:''}<div class="flex gap-1.5 mt-2"><button onclick="editEvent('${ev.id}')" class="flex-1 py-1.5 rounded-md text-xs text-gray-300 hover:bg-white/5" style="background:var(--s1)"><i class="fas fa-pen"></i></button><button onclick="openDel('event','${ev.id}','${(ev.titulo||'').replace(/'/g,"\\'")}')" class="flex-1 py-1.5 rounded-md text-xs text-red-400 bg-red-500/10 hover:bg-red-500/20"><i class="fas fa-trash"></i></button></div></div>`}).join('')+'</div>'}
 
-// --- Modales ---
-function openML(n){document.getElementById('ml-'+n).classList.add('on')}
-function closeML(n){document.getElementById('ml-'+n).classList.remove('on')}
-
-function openMemberModal(){
-    editMId=null;tmpPhoto=null;tmpOrigPhoto=null;tmpBack=null;
-    document.getElementById('ml-mt').textContent='Nuevo Integrante';document.getElementById('btn-mt').textContent='Registrar';
-    document.getElementById('frm-m').reset();document.getElementById('m-id').value='';
-    document.getElementById('inp-fing').value=new Date().toISOString().split('T')[0];
-    resetPV('main');resetPV('back');document.getElementById('btn-crop').classList.add('hidden');document.getElementById('btn-rmbk').classList.add('hidden');
-    openML('m');
-}
-function editMember(id){
-    const m=members.find(x=>x.id===id);if(!m)return;
-    editMId=id;tmpPhoto=m.foto||null;tmpOrigPhoto=m.foto||null;tmpBack=m.imagenReverso||null;
-    document.getElementById('ml-mt').textContent='Editar Integrante';document.getElementById('btn-mt').textContent='Actualizar';
-    document.getElementById('m-id').value=id;
-    document.getElementById('inp-nom').value=m.nombre||'';document.getElementById('inp-apo').value=m.apodo||'';
-    document.getElementById('inp-sex').value=m.sexo||'';document.getElementById('inp-esp').value=m.especialidad||'';
-    document.getElementById('inp-est').value=m.estado||'Activo';document.getElementById('inp-fing').value=m.fechaIngreso||'';
-    document.getElementById('inp-fnac').value=m.fechaNacimiento||'';document.getElementById('inp-cit').value=m.cita||'';
-    if(m.foto){setPV('main',m.foto);document.getElementById('btn-crop').classList.remove('hidden')}else{resetPV('main');document.getElementById('btn-crop').classList.add('hidden')}
-    if(m.imagenReverso){setPV('back',m.imagenReverso);document.getElementById('btn-rmbk').classList.remove('hidden')}else{resetPV('back');document.getElementById('btn-rmbk').classList.add('hidden')}
-    openML('m');
-}
-async function submitMember(e){
-    e.preventDefault();
-    const data={id:editMId||gid(),numeroSocio:editMId?(members.find(m=>m.id===editMId)||{}).numeroSocio||nextNum():nextNum(),
-        nombre:document.getElementById('inp-nom').value.trim(),apodo:document.getElementById('inp-apo').value.trim(),
-        sexo:document.getElementById('inp-sex').value.trim()||'Por Favor',especialidad:document.getElementById('inp-esp').value.trim()||'Tomar hasta beber',
-        estado:document.getElementById('inp-est').value,fechaIngreso:document.getElementById('inp-fing').value,
-        fechaNacimiento:document.getElementById('inp-fnac').value,cita:document.getElementById('inp-cit').value.trim(),
-        foto:tmpPhoto,imagenReverso:tmpBack,actualizadoEn:new Date().toISOString()};
-    if(!data.nombre){toast('Nombre obligatorio','err');return}
-    try{await saveM(data);toast(editMId?'Actualizado':'Registrado','ok');closeML('m')}catch(er){toast('Error: '+er.message,'err')}
-}
-
+// Modales
+function openML(n){document.getElementById('ml-'+n).classList.add('on')}function closeML(n){document.getElementById('ml-'+n).classList.remove('on')}
+function openMemberModal(){editMId=null;tmpPhoto=null;tmpOrigPhoto=null;tmpBack=null;document.getElementById('ml-mt').textContent='Nuevo Integrante';document.getElementById('btn-mt').textContent='Registrar';document.getElementById('frm-m').reset();document.getElementById('m-id').value='';document.getElementById('inp-fing').value=new Date().toISOString().split('T')[0];resetPV('main');resetPV('back');document.getElementById('btn-crop').classList.add('hidden');document.getElementById('btn-rmbk').classList.add('hidden');openML('m')}
+function editMember(id){const m=members.find(x=>x.id===id);if(!m)return;editMId=id;tmpPhoto=m.foto||null;tmpOrigPhoto=m.foto||null;tmpBack=m.imagenReverso||null;document.getElementById('ml-mt').textContent='Editar Integrante';document.getElementById('btn-mt').textContent='Actualizar';document.getElementById('m-id').value=id;document.getElementById('inp-nom').value=m.nombre||'';document.getElementById('inp-sex').value=m.sexo||'';document.getElementById('inp-esp').value=m.especialidad||'';document.getElementById('inp-apo').value=m.apodo||'';document.getElementById('inp-dom').value=m.domicilio||'';document.getElementById('inp-eciv').value=m.estadoCivil||'';document.getElementById('inp-deb').value=m.debilidad||'';document.getElementById('inp-est').value=m.estado||'Activo';document.getElementById('inp-fing').value=m.fechaIngreso||'';document.getElementById('inp-fnac').value=m.fechaNacimiento||'';document.getElementById('inp-cit').value=m.cita||'';if(m.foto){setPV('main',m.foto);document.getElementById('btn-crop').classList.remove('hidden')}else{resetPV('main');document.getElementById('btn-crop').classList.add('hidden')}if(m.imagenReverso){setPV('back',m.imagenReverso);document.getElementById('btn-rmbk').classList.remove('hidden')}else{resetPV('back');document.getElementById('btn-rmbk').classList.add('hidden')}openML('m')}
+async function submitMember(e){e.preventDefault();const d={id:editMId||gid(),numeroSocio:editMId?(members.find(m=>m.id===editMId)||{}).numeroSocio||nextNum():nextNum(),nombre:document.getElementById('inp-nom').value.trim(),sexo:document.getElementById('inp-sex').value.trim()||'Por Favor',especialidad:document.getElementById('inp-esp').value.trim()||'Tomar hasta beber',apodo:document.getElementById('inp-apo').value.trim(),domicilio:document.getElementById('inp-dom').value.trim(),estadoCivil:document.getElementById('inp-eciv').value.trim(),debilidad:document.getElementById('inp-deb').value.trim(),estado:document.getElementById('inp-est').value,fechaIngreso:document.getElementById('inp-fing').value,fechaNacimiento:document.getElementById('inp-fnac').value,cita:document.getElementById('inp-cit').value.trim(),foto:tmpPhoto,imagenReverso:tmpBack,actualizadoEn:new Date().toISOString()};if(!d.nombre){toast('Nombre obligatorio','err');return}if(!d.fechaNacimiento){toast('Fecha de nacimiento obligatoria','err');return}try{await saveM(d);toast(editMId?'Actualizado':'Registrado','ok');closeML('m')}catch(er){toast('Error: '+er.message,'err')}}
 function openEventModal(){editEId=null;tmpEvImg=null;document.getElementById('ml-et').textContent='Nuevo Evento';document.getElementById('frm-e').reset();document.getElementById('e-id').value='';resetPV('ev');openML('e')}
 function editEvent(id){const ev=events.find(x=>x.id===id);if(!ev)return;editEId=id;tmpEvImg=ev.imagen||null;document.getElementById('ml-et').textContent='Editar Evento';document.getElementById('e-id').value=id;document.getElementById('inp-etit').value=ev.titulo||'';document.getElementById('inp-efec').value=ev.fecha||'';document.getElementById('inp-edesc').value=ev.descripcion||'';if(ev.imagen)setPV('ev',ev.imagen);else resetPV('ev');openML('e')}
-async function submitEvent(e){
-    e.preventDefault();
-    const data={id:editEId||gid(),titulo:document.getElementById('inp-etit').value.trim(),fecha:document.getElementById('inp-efec').value,
-        descripcion:document.getElementById('inp-edesc').value.trim(),imagen:tmpEvImg,actualizadoEn:new Date().toISOString()};
-    if(!data.titulo){toast('Titulo obligatorio','err');return}
-    try{await saveEv(data);toast(editEId?'Evento actualizado':'Evento creado','ok');closeML('e')}catch(er){toast('Error: '+er.message,'err')}
-}
-
-function openDel(type,id,name){delTarget={type,id};document.getElementById('del-msg').innerHTML=`Eliminar <strong class="text-t-100">${name}</strong>?`;openML('del')}
+async function submitEvent(e){e.preventDefault();const d={id:editEId||gid(),titulo:document.getElementById('inp-etit').value.trim(),fecha:document.getElementById('inp-efec').value,descripcion:document.getElementById('inp-edesc').value.trim(),imagen:tmpEvImg,actualizadoEn:new Date().toISOString()};if(!d.titulo){toast('Titulo obligatorio','err');return}try{await saveEv(d);toast(editEId?'Evento actualizado':'Evento creado','ok');closeML('e')}catch(er){toast('Error: '+er.message,'err')}}
+function openDel(t,id,n){delTarget={type:t,id};document.getElementById('del-msg').innerHTML=`Eliminar <strong class="text-t-100">${n}</strong>?`;openML('del')}
 async function confirmDel(){if(!delTarget)return;try{if(delTarget.type==='member')await delM(delTarget.id);else await delEv(delTarget.id);toast('Eliminado','ok')}catch(e){toast('Error','err')}closeML('del');delTarget=null}
 
-// --- Foto previews ---
-function resetPV(t){
-    if(t==='main'){document.getElementById('ph-pv').classList.add('hidden');document.getElementById('ph-ic').classList.remove('hidden')}
-    else if(t==='back'){document.getElementById('bk-pv').classList.add('hidden');document.getElementById('bk-ic').classList.remove('hidden')}
-    else if(t==='ev'){document.getElementById('evi-pv').classList.add('hidden');document.getElementById('evi-ic').classList.remove('hidden')}
-}
-function setPV(t,src){
-    if(t==='main'){document.getElementById('ph-pv').src=src;document.getElementById('ph-pv').classList.remove('hidden');document.getElementById('ph-ic').classList.add('hidden')}
-    else if(t==='back'){document.getElementById('bk-pv').src=src;document.getElementById('bk-pv').classList.remove('hidden');document.getElementById('bk-ic').classList.add('hidden')}
-    else if(t==='ev'){document.getElementById('evi-pv').src=src;document.getElementById('evi-pv').classList.remove('hidden');document.getElementById('evi-ic').classList.add('hidden')}
-}
-async function onPhotoPick(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async ev=>{const res=await resizeImg(ev.target.result,800,800);tmpOrigPhoto=res;tmpPhoto=res;setPV('main',res);document.getElementById('btn-crop').classList.remove('hidden')};r.readAsDataURL(f)}
+// Foto previews
+function resetPV(t){if(t==='main'){document.getElementById('ph-pv').classList.add('hidden');document.getElementById('ph-ic').classList.remove('hidden')}else if(t==='back'){document.getElementById('bk-pv').classList.add('hidden');document.getElementById('bk-ic').classList.remove('hidden')}else if(t==='ev'){document.getElementById('evi-pv').classList.add('hidden');document.getElementById('evi-ic').classList.remove('hidden')}}
+function setPV(t,s){if(t==='main'){document.getElementById('ph-pv').src=s;document.getElementById('ph-pv').classList.remove('hidden');document.getElementById('ph-ic').classList.add('hidden')}else if(t==='back'){document.getElementById('bk-pv').src=s;document.getElementById('bk-pv').classList.remove('hidden');document.getElementById('bk-ic').classList.add('hidden')}else if(t==='ev'){document.getElementById('evi-pv').src=s;document.getElementById('evi-pv').classList.remove('hidden');document.getElementById('evi-ic').classList.add('hidden')}}
+async function onPhotoPick(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async ev=>{const res=await resizeImg(ev.target.result,1200,1200);tmpOrigPhoto=res;tmpPhoto=res;setPV('main',res);document.getElementById('btn-crop').classList.remove('hidden');openCropper()};r.readAsDataURL(f)}
 async function onBackPick(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async ev=>{const res=await resizeImg(ev.target.result,600,600);tmpBack=res;setPV('back',res);document.getElementById('btn-rmbk').classList.remove('hidden')};r.readAsDataURL(f)}
 async function onEvImgPick(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async ev=>{const res=await resizeImg(ev.target.result,800,600);tmpEvImg=res;setPV('ev',res)};r.readAsDataURL(f)}
 function rmBackImg(){tmpBack=null;resetPV('back');document.getElementById('btn-rmbk').classList.add('hidden');document.getElementById('fi-back').value=''}
 
-// --- Cropper ---
-let cropState={dragging:false,sx:0,sy:0,ox:0,oy:0,imgX:0,imgY:0,scale:1};
-function openCropper(){
-    if(!tmpOrigPhoto)return;
-    const img=document.getElementById('crop-img');
-    img.src=tmpOrigPhoto;
-    img.onload=()=>{
-        cropState.scale=1;cropState.imgX=0;cropState.imgY=0;
-        document.getElementById('crop-zoom').value=100;
-        updateCropPos();
-    };
-    openML('crop');
-}
-function updateCropZoom(){
-    cropState.scale=parseInt(document.getElementById('crop-zoom').value)/100;
-    updateCropPos();
-}
-function updateCropPos(){
-    const img=document.getElementById('crop-img'),area=document.getElementById('crop-area');
-    const aw=area.offsetWidth||280,ah=area.offsetHeight||320;
-    const iw=tmpOrigPhoto?400:100,ih=tmpOrigPhoto?480:120;
-    const sw=iw*cropState.scale,sh=ih*cropState.scale;
-    img.style.width=sw+'px';img.style.height=sh+'px';
-    img.style.left=cropState.imgX+'px';img.style.top=cropState.imgY+'px';
-}
-// Drag en el cropper
-document.addEventListener('mousedown',e=>{if(e.target.id==='crop-img'){cropState.dragging=true;cropState.sx=e.clientX;cropState.sy=e.clientY;cropState.ox=cropState.imgX;cropState.oy=cropState.imgY;e.preventDefault()}});
-document.addEventListener('mousemove',e=>{if(cropState.dragging){cropState.imgX=cropState.ox+(e.clientX-cropState.sx);cropState.imgY=cropState.oy+(e.clientY-cropState.sy);updateCropPos()}});
-document.addEventListener('mouseup',()=>{cropState.dragging=false});
-// Touch
-document.addEventListener('touchstart',e=>{if(e.target.id==='crop-img'){const t=e.touches[0];cropState.dragging=true;cropState.sx=t.clientX;cropState.sy=t.clientY;cropState.ox=cropState.imgX;cropState.oy=cropState.imgY;e.preventDefault()}},{passive:false});
-document.addEventListener('touchmove',e=>{if(cropState.dragging){const t=e.touches[0];cropState.imgX=cropState.ox+(t.clientX-cropState.sx);cropState.imgY=cropState.oy+(t.clientY-cropState.sy);updateCropPos();e.preventDefault()}},{passive:false});
-document.addEventListener('touchend',()=>{cropState.dragging=false});
+// CROPPER
+let cs={drag:false,sx:0,sy:0,ox:0,oy:0,imgX:0,imgY:0,scale:1,natW:1,natH:1};
+function openCropper(){if(!tmpOrigPhoto)return;const img=document.getElementById('crop-img');img.src=tmpOrigPhoto;img.onload=()=>{cs.natW=img.naturalWidth;cs.natH=img.naturalHeight;const area=document.getElementById('crop-area'),aw=area.offsetWidth||300,ah=area.offsetHeight||360;cs.scale=aw/cs.natW*1.2;cs.imgX=0;cs.imgY=0;document.getElementById('crop-zoom').value=Math.round(cs.scale*100/(aw/cs.natW*1.2)*100);updateCropZoom();updateCropPos()};openML('crop')}
+function updateCropZoom(){const area=document.getElementById('crop-area'),aw=area.offsetWidth||300;const base=aw/cs.natW*1.2;cs.scale=base*(parseInt(document.getElementById('crop-zoom').value)/100);document.getElementById('crop-zoom-val').textContent=Math.round(cs.scale/base*100)+'%';updateCropPos()}
+function updateCropPos(){const img=document.getElementById('crop-img');img.style.width=Math.round(cs.natW*cs.scale)+'px';img.style.height=Math.round(cs.natH*cs.scale)+'px';img.style.left=Math.round(cs.imgX)+'px';img.style.top=Math.round(cs.imgY)+'px'}
+document.addEventListener('mousedown',e=>{if(e.target.id==='crop-area'||e.target.id==='crop-img'){cs.drag=true;cs.sx=e.clientX;cs.sy=e.clientY;cs.ox=cs.imgX;cs.oy=cs.imgY;e.preventDefault()}});
+document.addEventListener('mousemove',e=>{if(cs.drag){cs.imgX=cs.ox+(e.clientX-cs.sx);cs.imgY=cs.oy+(e.clientY-cs.sy);updateCropPos()}});
+document.addEventListener('mouseup',()=>{cs.drag=false});
+document.addEventListener('touchstart',e=>{const el=e.target;if(el.id==='crop-area'||el.id==='crop-img'){const t=e.touches[0];cs.drag=true;cs.sx=t.clientX;cs.sy=t.clientY;cs.ox=cs.imgX;cs.oy=cs.imgY;e.preventDefault()}},{passive:false});
+document.addEventListener('touchmove',e=>{if(cs.drag){const t=e.touches[0];cs.imgX=cs.ox+(t.clientX-cs.sx);cs.imgY=cs.oy+(t.clientY-cs.sy);updateCropPos();e.preventDefault()}},{passive:false});
+document.addEventListener('touchend',()=>{cs.drag=false});
+function confirmCrop(){const area=document.getElementById('crop-area'),frame=document.getElementById('crop-frame');const c=document.createElement('canvas');const oW=200,oH=240;c.width=oW;c.height=oH;const ctx=c.getContext('2d');const fx=parseInt(frame.style.left)||90,fy=parseInt(frame.style.top)||108,fw=parseInt(frame.style.width)||120,fh=parseInt(frame.style.height)||144;const srcX=(fx-cs.imgX)/cs.scale,srcY=(fy-cs.imgY)/cs.scale,srcW=fw/cs.scale,srcH=fh/cs.scale;const oImg=new Image();oImg.onload=()=>{ctx.drawImage(oImg,Math.max(0,srcX),Math.max(0,srcY),Math.max(1,srcW),Math.max(1,srcH),0,0,oW,oH);tmpPhoto=c.toDataURL('image/jpeg',.85);setPV('main',tmpPhoto);closeML('crop');toast('Foto ajustada','ok')};oImg.src=tmpOrigPhoto}
 
-function confirmCrop(){
-    const area=document.getElementById('crop-area'),frame=document.getElementById('crop-frame');
-    const img=document.getElementById('crop-img');
-    const c=document.createElement('canvas');
-    const outW=200,outH=240; // salida
-    c.width=outW;c.height=outH;
-    const ctx=c.getContext('2d');
-    // Frame position relative to area
-    const fx=parseInt(frame.style.left)||80,fy=parseInt(frame.style.top)||88,fw=parseInt(frame.style.width)||120,fh=parseInt(frame.style.height)||144;
-    // Image position relative to area
-    const ix=parseFloat(img.style.left)||0,iy=parseFloat(img.style.top)||0;
-    // Scale from area to output
-    const scX=outW/fw,scY=outH/fh;
-    // Source coordinates on the displayed image
-    const srcX=(fx-ix)/cropState.scale,srcY=(fy-iy)/cropState.scale;
-    const srcW=fw/cropState.scale,srcH=fh/cropState.scale;
-    // Draw from original image
-    const origImg=new Image();origImg.onload=()=>{
-        ctx.drawImage(origImg,Math.max(0,srcX),Math.max(0,srcY),srcW,srcH,0,0,outW,outH);
-        tmpPhoto=c.toDataURL('image/jpeg',.85);
-        setPV('main',tmpPhoto);
-        closeML('crop');
-        toast('Foto recortada','ok');
-    };origImg.src=tmpOrigPhoto;
+// CARNET
+let curCM=null,curCS='front';
+function viewCarnet(id){const m=members.find(x=>x.id===id);if(!m)return;curCM=m;renderCF(m);renderCB(m);showCS('front');openML('carnet')}
+function showCS(s){curCS=s;document.getElementById('carnet-front').classList.toggle('hidden',s!=='front');document.getElementById('carnet-back').classList.toggle('hidden',s!=='back');const bf=document.getElementById('cside-f'),bb=document.getElementById('cside-b');if(s==='front'){bf.className='px-4 py-1.5 rounded-lg text-sm font-medium bg-t-300/15 text-t-200 border border-t-300/25';bb.className='px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 border border-transparent hover:text-t-200'}else{bb.className='px-4 py-1.5 rounded-lg text-sm font-medium bg-q-400/10 text-q-400 border border-q-400/25';bf.className='px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 border border-transparent hover:text-t-200'}}
+
+function renderCF(m){
+const ini=(m.nombre||'??').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+const ph=m.foto?`<img src="${m.foto}" alt="">`:`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#8b6508;font-size:22px;font-weight:bold;font-family:Cinzel,serif">${ini}</div>`;
+document.getElementById('carnet-front').innerHTML=`
+<div class="cbg"></div>
+<img src="${LOGO}" class="clogo-mark" style="width:220px;height:220px;right:20px;top:50%;transform:translateY(-50%)" onerror="this.style.display='none'">
+<div class="cbo"></div><div class="cbi"></div>
+<div class="ccn tl"></div><div class="ccn tr"></div><div class="ccn bl"></div><div class="ccn br"></div>
+<!-- Header -->
+<div style="position:absolute;top:10px;left:12px;right:12px;text-align:center;z-index:2">
+<div style="font-size:8px;color:#6d4c00;letter-spacing:2px;font-weight:600">ESTADO PLURINACIONAL DE BOLIVIA</div>
+<div style="font-family:Cinzel,serif;font-size:7.5px;color:#8b6508;letter-spacing:1.5px;margin-top:1px">VICEMINISTERIO DE CATADORES DE BEBITAS</div>
+<div class="tricolor" style="margin-top:3px;border-radius:2px;overflow:hidden"><div class="tc-r"></div><div class="tc-y"></div><div class="tc-v"></div></div>
+</div>
+<!-- Body -->
+<div style="position:absolute;top:48px;left:18px;right:18px;bottom:40px;display:flex;gap:14px;z-index:2">
+<div class="cpf" style="width:95px;height:115px;flex-shrink:0">${ph}</div>
+<div class="cinf" style="flex:1;display:flex;flex-direction:column;gap:2px;padding-top:0">
+<div class="cf"><span class="cl">Nombre:</span><span class="cv">${(m.nombre||'N/A').toUpperCase()}</span></div>
+<div class="cf"><span class="cl">Sexo:</span><span class="cv">${(m.sexo||'N/A').toUpperCase()}</span></div>
+<div class="cf"><span class="cl">Especialidad:</span><span class="cv">${(m.especialidad||'N/A').toUpperCase()}</span></div>
+<div class="cf"><span class="cl">Nombre clave:</span><span class="cv">${(m.apodo||'N/A').toUpperCase()}</span></div>
+<div class="cf"><span class="cl">Domicilio:</span><span class="cv">${(m.domicilio||'N/A').toUpperCase()}</span></div>
+<div class="cf"><span class="cl">Estado civil:</span><span class="cv">${(m.estadoCivil||'N/A').toUpperCase()}</span></div>
+<div class="cf"><span class="cl">Debilidad:</span><span class="cv">${(m.debilidad||'N/A').toUpperCase()}</span></div>
+</div></div>
+<!-- Numero -->
+<div style="position:absolute;bottom:28px;left:18px;font-family:Cinzel,serif;font-size:10px;color:#6d4c00;font-weight:700;letter-spacing:2px;z-index:2">${m.numeroSocio||'BT-???'}</div>
+<!-- Franja CARNET DE CAÑADOR -->
+<div class="stripe" style="bottom:6px;height:22px;line-height:22px;font-size:9px;background:linear-gradient(135deg,#5c1a1a,#7a2020,#5c1a1a);border-radius:0 0 7px 7px">CARNET DE CAÑADOR</div>`;
 }
 
-// --- CARNET ---
-let curCarnetM=null,curCarnetSide='front';
-function viewCarnet(id){
-    const m=members.find(x=>x.id===id);if(!m)return;
-    curCarnetM=m;curCarnetSide='front';
-    renderCarnetFront(m);renderCarnetBack(m);
-    showCarnetSide('front');
-    openML('carnet');
-}
-function showCarnetSide(s){
-    curCarnetSide=s;
-    document.getElementById('carnet-front').classList.toggle('hidden',s!=='front');
-    document.getElementById('carnet-back').classList.toggle('hidden',s!=='back');
-    const bf=document.getElementById('cside-f'),bb=document.getElementById('cside-b');
-    if(s==='front'){bf.className='px-4 py-1.5 rounded-lg text-sm font-medium bg-t-300/15 text-t-200 border border-t-300/25';bb.className='px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 border border-transparent hover:text-t-200'}
-    else{bb.className='px-4 py-1.5 rounded-lg text-sm font-medium bg-q-400/10 text-q-400 border border-q-400/25';bf.className='px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 border border-transparent hover:text-t-200'}
-}
-
-function renderCarnetFront(m){
-    const ini=(m.nombre||'??').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-    const ph=m.foto?`<img src="${m.foto}" alt="${m.nombre}">`:`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#8b6508;font-size:24px;font-weight:bold;font-family:'Cinzel',serif">${ini}</div>`;
-    document.getElementById('carnet-front').innerHTML=`
-        <div class="cbg"></div>
-        <img src="${LOGO}" class="clogo-mark" style="width:180px;height:180px;right:30px;top:50%;transform:translateY(-50%);opacity:.05" onerror="this.style.display='none'">
-        <div class="cwmark">TEKILA</div>
-        <div class="cbo"></div><div class="cbi"></div>
-        <div class="ccn tl"></div><div class="ccn tr"></div><div class="ccn bl"></div><div class="ccn br"></div>
-        <div class="chdr"><img src="${LOGO}" class="limg" onerror="this.style.display='none'"><div><div class="ht">BAR TEKILA & ASOCIADOS</div><div class="hs">IDENTIFICACION OFICIAL</div></div></div>
-        <div class="cdt">CARNET DE INTEGRANTE</div>
-        <div class="cbd"><div class="cpf">${ph}</div><div class="cinf">
-            <div class="cf"><span class="cl">Nombre:</span><span class="cv">${(m.nombre||'N/A').toUpperCase()}</span></div>
-            <div class="cf"><span class="cl">Apodo:</span><span class="cv">${(m.apodo||'N/A').toUpperCase()}</span></div>
-            <div class="cf"><span class="cl">Sexo:</span><span class="cv">${(m.sexo||'N/A').toUpperCase()}</span></div>
-            <div class="cf"><span class="cl">Especialidad:</span><span class="cv">${(m.especialidad||'N/A').toUpperCase()}</span></div>
-            <div class="cf"><span class="cl">Ingreso:</span><span class="cv">${fmtD(m.fechaIngreso)}</span></div>
-            ${m.fechaNacimiento?`<div class="cf"><span class="cl">Nacimiento:</span><span class="cv">${fmtD(m.fechaNacimiento)}</span></div>`:''}
-            ${m.cita?`<div style="margin-top:2px"><span class="cv" style="font-size:7.5px;font-style:italic;color:#6d4c00;font-weight:400">"${m.cita}"</span></div>`:''}
-        </div></div>
-        <div class="cft">
-            <div class="cstamp"><div class="cstmp-i"><div style="font-size:5px">BAR TEKILA</div><div class="cstmp-s">&#9733;</div><div style="font-size:4px">& ASOCIADOS</div></div></div>
-            <div style="flex:1;text-align:center"><div style="font-size:6.5px;color:#8b6508">Vigencia: Hasta que el cuerpo aguante</div></div>
-            <div style="text-align:right"><div class="cnum">${m.numeroSocio||'BT-???'}</div><div style="font-size:6.5px;color:#8b6508">Estado: ${(m.estado||'N/A').toUpperCase()}</div></div>
-        </div>`;
+function renderCB(m){
+const qrD=genQR(JSON.stringify({nombre:m.nombre,numero:m.numeroSocio,grupo:'Bar Tekila & Asociados'}));
+const qrOrImg=m.imagenReverso?`<img src="${m.imagenReverso}" alt="">`:qrD?`<img src="${qrD}" alt="QR">`:'<div style="color:#8b6508;font-size:10px">QR</div>';
+document.getElementById('carnet-back').innerHTML=`
+<div class="cbg"></div>
+<img src="${LOGO}" class="clogo-mark" style="width:160px;height:160px;left:50%;top:40%;transform:translate(-50%,-50%)" onerror="this.style.display='none'">
+<div class="cbo"></div><div class="cbi"></div>
+<div class="ccn tl"></div><div class="ccn tr"></div><div class="ccn bl"></div><div class="ccn br"></div>
+<div style="position:absolute;top:10px;left:0;right:0;text-align:center;z-index:2">
+<div style="font-family:Cinzel,serif;font-size:11px;font-weight:900;color:#6d4c00;letter-spacing:2px">LICENCIA PARA TOMAR</div>
+<div style="font-family:Cinzel,serif;font-size:11px;font-weight:900;color:#6d4c00;letter-spacing:2px">EN EXCESO</div>
+</div>
+<div style="position:absolute;top:50px;left:18px;right:18px;bottom:52px;display:flex;gap:14px;align-items:center;z-index:2">
+<div style="flex-shrink:0"><div class="cback-qr">${qrOrImg}</div></div>
+<div style="flex:1;font-size:8.5px;color:#4a3300;line-height:1.6;font-style:italic">
+<p>El portador de esta licencia</p>
+<p>esta certificado para tomar cuando</p>
+<p>quiera, donde quiera, con quien quiera</p>
+<p>y lo que sea por lo que se pide</p>
+<p>a la ciudadania no intervenir en</p>
+<p>las actividades de nuestro socio</p>
+</div></div>
+<!-- Franja -->
+<div class="stripe" style="bottom:22px;height:20px;line-height:20px;font-size:7.5px;font-style:italic;background:linear-gradient(135deg,#5c1a1a,#7a2020,#5c1a1a);letter-spacing:2px">LOS BORRACHOS SOMOS GENTE DECENTE</div>
+<div style="position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:5.5px;color:#8b6508;letter-spacing:.5px;z-index:2">EN CASO DE EMERGENCIA DARLE TRAGO AL PORTADOR</div>`;
 }
 
-function renderCarnetBack(m){
-    const qrData=genQR(JSON.stringify({nombre:m.nombre,numero:m.numeroSocio,grupo:'Bar Tekila & Asociados'}));
-    const qrOrImg=m.imagenReverso?`<img src="${m.imagenReverso}" alt="Imagen">`:qrData?`<img src="${qrData}" alt="QR">`:'<div style="color:#8b6508;font-size:10px">QR</div>';
-    document.getElementById('carnet-back').innerHTML=`
-        <div class="cbg"></div>
-        <img src="${LOGO}" class="clogo-mark" style="width:140px;height:140px;left:50%;top:50%;transform:translate(-50%,-50%);opacity:.04" onerror="this.style.display='none'">
-        <div class="cwmark">BAR</div>
-        <div class="cbo"></div><div class="cbi"></div>
-        <div class="ccn tl"></div><div class="ccn tr"></div><div class="ccn bl"></div><div class="ccn br"></div>
-        <div style="position:absolute;top:12px;left:12px;right:12px;text-align:center">
-            <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:#6d4c00;letter-spacing:3px">BAR TEKILA & ASOCIADOS</div>
-            <div class="cdiv" style="margin:4px 16px"></div>
-        </div>
-        <div style="position:absolute;top:46px;left:18px;right:18px;bottom:44px;display:flex;gap:16px;align-items:center">
-            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
-                <div class="cback-qr">${qrOrImg}</div>
-                <div style="font-size:6.5px;color:#8b6508;margin-top:3px;text-align:center">${m.imagenReverso?'Imagen personalizada':'Codigo de verificacion'}</div>
-            </div>
-            <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
-                <div style="font-family:'Cinzel',serif;font-size:8px;font-weight:700;color:#6d4c00;letter-spacing:1px;margin-bottom:3px">REGLAS DEL ESTABLECIMIENTO</div>
-                <div class="crules"><ol>
-                    <li>No se acepta "ya me voy"</li>
-                    <li>La ronda es sagrada</li>
-                    <li>El bartender tiene razon</li>
-                    <li>Quien llega tarde paga doble</li>
-                    <li>Negarse a un brindis es traicion</li>
-                </ol></div>
-            </div>
-        </div>
-        <div style="position:absolute;bottom:8px;left:18px;right:18px;text-align:center">
-            <div style="font-family:'Cinzel',serif;font-size:9px;color:#6d4c00;font-style:italic;letter-spacing:1px">"Bar Tekila no es un lugar, es su gente"</div>
-            <div style="font-size:6px;color:#8b6508;margin-top:2px">En caso de emergencia: <strong>Pedir otra ronda</strong> · ${m.numeroSocio||'BT-???'}</div>
-        </div>`;
-}
+async function dlCarnet(side){try{await document.fonts.ready;const opts={scale:3,useCORS:true,allowTaint:true,backgroundColor:null,logging:false};const nm=(curCM?.nombre||'miembro').replace(/\s+/g,'-').toLowerCase();if(side==='front'||side==='both'){showCS('front');await new Promise(r=>setTimeout(r,200));const c=await html2canvas(document.getElementById('carnet-front'),opts);const a=document.createElement('a');a.download=`carnet-anverso-${nm}.png`;a.href=c.toDataURL('image/png');a.click()}if(side==='back'||side==='both'){showCS('back');await new Promise(r=>setTimeout(r,300));const c=await html2canvas(document.getElementById('carnet-back'),opts);const a=document.createElement('a');a.download=`carnet-reverso-${nm}.png`;a.href=c.toDataURL('image/png');a.click()}toast('Carnet descargado','ok')}catch(e){console.error(e);toast('Error al generar','err')}}
 
-async function dlCarnet(side){
-    try{
-        await document.fonts.ready;
-        const opts={scale:3,useCORS:true,allowTaint:true,backgroundColor:null,logging:false};
-        const nm=(curCarnetM?.nombre||'miembro').replace(/\s+/g,'-').toLowerCase();
-        if(side==='front'||side==='both'){
-            showCarnetSide('front');await new Promise(r=>setTimeout(r,200));
-            const c=await html2canvas(document.getElementById('carnet-front'),opts);
-            const a=document.createElement('a');a.download=`carnet-anverso-${nm}.png`;a.href=c.toDataURL('image/png');a.click();
-        }
-        if(side==='back'||side==='both'){
-            showCarnetSide('back');await new Promise(r=>setTimeout(r,300));
-            const c=await html2canvas(document.getElementById('carnet-back'),opts);
-            const a=document.createElement('a');a.download=`carnet-reverso-${nm}.png`;a.href=c.toDataURL('image/png');a.click();
-        }
-        toast('Carnet descargado','ok');
-    }catch(e){console.error(e);toast('Error al generar','err')}
-}
+async function printPDF(){if(!members.length){toast('No hay integrantes','err');return}toast('Generando PDF...','info');try{await document.fonts.ready;const{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:[154,96]});const cont=document.getElementById('pdf-render');for(let i=0;i<members.length;i++){if(i>0)pdf.addPage([154,96]);const m=members[i];renderCF(m);const fe=document.createElement('div');fe.className='cw';fe.style.cssText='width:560px;height:350px;position:relative;font-family:Poppins,sans-serif;overflow:hidden';fe.innerHTML=document.getElementById('carnet-front').innerHTML;cont.innerHTML='';cont.appendChild(fe);await new Promise(r=>setTimeout(r,200));const fc=await html2canvas(fe,{scale:2,useCORS:true,allowTaint:true,backgroundColor:null,logging:false});pdf.addImage(fc.toDataURL('image/png'),'PNG',0,0,154,96);pdf.addPage([154,96]);renderCB(m);const be=document.createElement('div');be.className='cw';be.style.cssText='width:560px;height:350px;position:relative;font-family:Poppins,sans-serif;overflow:hidden';be.innerHTML=document.getElementById('carnet-back').innerHTML;cont.innerHTML='';cont.appendChild(be);await new Promise(r=>setTimeout(r,200));const bc=await html2canvas(be,{scale:2,useCORS:true,allowTaint:true,backgroundColor:null,logging:false});pdf.addImage(bc.toDataURL('image/png'),'PNG',0,0,154,96)}cont.innerHTML='';pdf.save('carnets-bar-tekila.pdf');toast('PDF generado','ok')}catch(e){console.error(e);toast('Error PDF','err')}}
 
-// --- PDF ---
-async function printPDF(){
-    if(!members.length){toast('No hay integrantes','err');return}
-    toast('Generando PDF...','info');
-    try{
-        await document.fonts.ready;
-        const{jsPDF}=window.jspdf;
-        const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:[154,96]});
-        const cW=154,cH=96;
-        const cont=document.getElementById('pdf-render');
+function toast(msg,type){const c=document.getElementById('toasts');const cls={ok:'bg-green-500/15 border-green-500/30 text-green-300',err:'bg-red-500/15 border-red-500/30 text-red-300',info:'bg-t-300/15 border-t-300/30 text-t-200'};const ics={ok:'fa-check-circle',err:'fa-exclamation-circle',info:'fa-info-circle'};const t=document.createElement('div');t.className=`toast ${cls[type]||cls.info} border rounded-lg px-4 py-2.5 text-sm flex items-center gap-2 shadow-lg min-w-[200px]`;t.style.backdropFilter='blur(12px)';t.innerHTML=`<i class="fas ${ics[type]||ics.info}"></i><span>${msg}</span>`;c.appendChild(t);setTimeout(()=>{if(t.parentNode)t.remove()},3800)}
 
-        for(let i=0;i<members.length;i++){
-            if(i>0)pdf.addPage([154,96]);
-            const m=members[i];
-            // Anverso
-            renderCarnetFront(m);
-            const frontEl=document.createElement('div');frontEl.className='cw';frontEl.style.cssText='width:540px;height:340px;position:relative;font-family:Poppins,sans-serif;overflow:hidden';
-            frontEl.innerHTML=document.getElementById('carnet-front').innerHTML;
-            cont.innerHTML='';cont.appendChild(frontEl);
-            await new Promise(r=>setTimeout(r,150));
-            const fc=await html2canvas(frontEl,{scale:2,useCORS:true,allowTaint:true,backgroundColor:null,logging:false});
-            pdf.addImage(fc.toDataURL('image/png'),'PNG',0,0,cW,cH);
+// Fondo animado
+function initBg(){const cv=document.getElementById('bg-canvas'),ctx=cv.getContext('2d');let w,h,pts=[];function resize(){w=cv.width=window.innerWidth;h=cv.height=window.innerHeight}resize();window.addEventListener('resize',resize);class P{constructor(){this.reset()}reset(){this.x=Math.random()*w;this.y=h+Math.random()*100;this.r=Math.max(1,1.5+Math.random()*3);this.vy=.2+Math.random()*.6;this.vx=(Math.random()-.5)*.2;this.o=.1+Math.random()*.2;this.hue=32+Math.random()*18}update(){this.y-=this.vy;this.x+=this.vx+Math.sin(this.y*.006)*.2;if(this.y<-20)this.reset()}draw(){ctx.beginPath();ctx.arc(this.x,this.y,Math.max(.5,this.r),0,Math.PI*2);ctx.fillStyle=`hsla(${this.hue},70%,55%,${this.o})`;ctx.fill()}}for(let i=0;i<40;i++){const p=new P();p.y=Math.random()*h;pts.push(p)}function frame(){ctx.clearRect(0,0,w,h);pts.forEach(p=>{p.update();p.draw()});requestAnimationFrame(frame)}frame()}
 
-            // Reverso
-            pdf.addPage([154,96]);
-            renderCarnetBack(m);
-            const backEl=document.createElement('div');backEl.className='cw';backEl.style.cssText='width:540px;height:340px;position:relative;font-family:Poppins,sans-serif;overflow:hidden';
-            backEl.innerHTML=document.getElementById('carnet-back').innerHTML;
-            cont.innerHTML='';cont.appendChild(backEl);
-            await new Promise(r=>setTimeout(r,150));
-            const bc=await html2canvas(backEl,{scale:2,useCORS:true,allowTaint:true,backgroundColor:null,logging:false});
-            pdf.addImage(bc.toDataURL('image/png'),'PNG',0,0,cW,cH);
-        }
-        cont.innerHTML='';
-        pdf.save('carnets-bar-tekila.pdf');
-        toast('PDF generado','ok');
-    }catch(e){console.error(e);toast('Error al generar PDF','err')}
-}
-
-// --- Toast ---
-function toast(msg,type){
-    const c=document.getElementById('toasts');
-    const cls={ok:'bg-green-500/15 border-green-500/30 text-green-300',err:'bg-red-500/15 border-red-500/30 text-red-300',info:'bg-t-300/15 border-t-300/30 text-t-200'};
-    const ics={ok:'fa-check-circle',err:'fa-exclamation-circle',info:'fa-info-circle'};
-    const t=document.createElement('div');
-    t.className=`toast ${cls[type]||cls.info} border rounded-lg px-4 py-2.5 text-sm flex items-center gap-2 shadow-lg min-w-[200px]`;
-    t.style.backdropFilter='blur(12px)';
-    t.innerHTML=`<i class="fas ${ics[type]||ics.info}"></i><span>${msg}</span>`;
-    c.appendChild(t);setTimeout(()=>{if(t.parentNode)t.remove()},3800);
-}
-
-// --- Fondo animado ---
-function initBg(){
-    const canvas=document.getElementById('bg-canvas'),ctx=canvas.getContext('2d');
-    let w,h,particles=[];
-    function resize(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight}
-    resize();window.addEventListener('resize',resize);
-
-    class P{
-        constructor(){this.reset()}
-        reset(){this.x=Math.random()*w;this.y=h+Math.random()*100;this.r=Math.max(1,2+Math.random()*4);this.vy=.3+Math.random()*.8;this.vx=(Math.random()-.5)*.3;this.o=.15+Math.random()*.25;this.hue=35+Math.random()*15}
-        update(){this.y-=this.vy;this.x+=this.vx+Math.sin(this.y*.008)*.3;if(this.y<-20)this.reset()}
-        draw(){ctx.beginPath();ctx.arc(this.x,this.y,Math.max(.5,this.r),0,Math.PI*2);ctx.fillStyle=`hsla(${this.hue},70%,55%,${this.o})`;ctx.fill()}
-    }
-    for(let i=0;i<50;i++){const p=new P();p.y=Math.random()*h;particles.push(p)}
-
-    function frame(){
-        ctx.clearRect(0,0,w,h);
-        // Gradiente de fondo
-        const g=ctx.createRadialGradient(w*.3,h*.2,0,w*.5,h*.5,w*.8);
-        g.addColorStop(0,'rgba(30,20,8,0.3)');g.addColorStop(.5,'rgba(8,9,13,0.1)');g.addColorStop(1,'rgba(8,9,13,0)');
-        ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
-        particles.forEach(p=>{p.update();p.draw()});
-        requestAnimationFrame(frame);
-    }
-    frame();
-}
-
-// --- Init ---
-function init(){
-    initBg();initFB();
-    setTimeout(()=>{if(!members.length&&!events.length){loadLocal();if(!members.length){members=[
-        {id:gid(),numeroSocio:'BT-001',nombre:'Cristian Medina',apodo:'El Jefe',sexo:'Por Favor',especialidad:'Tomar hasta beber',estado:'Leyenda',fechaIngreso:'2024-01-15',fechaNacimiento:'1995-03-22',cita:'Yo no bebo, solo cata',foto:null,imagenReverso:null},
-        {id:gid(),numeroSocio:'BT-002',nombre:'Carlos Villanueva',apodo:'El Catador',sexo:'Si Por Favor',especialidad:'Catador Oficial',estado:'Activo',fechaIngreso:'2024-02-20',fechaNacimiento:'1998-07-10',cita:'Todo es mejor con tekila',foto:null,imagenReverso:null},
-        {id:gid(),numeroSocio:'BT-003',nombre:'Maria Fernanda Lopez',apodo:'La Reina',sexo:'Dama de Honor',especialidad:'Paz Social',estado:'Activo',fechaIngreso:'2024-03-10',fechaNacimiento:'2000-12-05',cita:'La vida es corta para mal vino',foto:null,imagenReverso:null},
-        {id:gid(),numeroSocio:'BT-004',nombre:'Roberto Castillo',apodo:'El Filosofo',sexo:'Macho Alfa',especialidad:'Filosofo del Bar',estado:'En Rehabilitación',fechaIngreso:'2024-04-05',fechaNacimiento:'1993-09-18',cita:'El que no arriesga no toma',foto:null,imagenReverso:null},
-        {id:gid(),numeroSocio:'BT-005',nombre:'Andrea Gutierrez',apodo:'La Animadora',sexo:'Todos los Dias',especialidad:'Animador Oficial',estado:'Activo',fechaIngreso:'2024-05-12',fechaNacimiento:'1997-01-30',cita:'Hoy se bebe, manana tambien',foto:null,imagenReverso:null},
-        {id:gid(),numeroSocio:'BT-006',nombre:'Diego Morales',apodo:'El Sobreviviente',sexo:'Por Favor',especialidad:'Sobreviviente',estado:'Probation',fechaIngreso:'2024-06-01',fechaNacimiento:'1996-05-14',cita:'Sobrevivi al domingo',foto:null,imagenReverso:null}
-    ];events=[
-        {id:gid(),titulo:'Noche de Tekila Inaugural',fecha:'2025-07-20',descripcion:'La primera gran noche del grupo con seleccion de tekilas artesanales.',imagen:null},
-        {id:gid(),titulo:'Cena de Gala Bar Tekila',fecha:'2025-08-15',descripcion:'Cena elegante con maridaje de tekilas premium.',imagen:null}
-    ];saveLocal()}renderAll()}},3000);
-
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')['m','e','crop','carnet','del'].forEach(n=>closeML(n))});
-    ['m','e','crop','carnet','del'].forEach(n=>{document.getElementById('ml-'+n).addEventListener('click',function(e){if(e.target===this)closeML(n)})});
-}
-
+function init(){initBg();initFB();setTimeout(()=>{if(!members.length&&!events.length){loadLocal();if(!members.length){members=[
+{id:gid(),numeroSocio:'BT-001',nombre:'Cristian Medina',sexo:'Por Favor',especialidad:'Tomar hasta beber',apodo:'El Jefe',domicilio:'Calle Tekila #1',estadoCivil:'Casado con el trago',debilidad:'El tekila',estado:'Leyenda',fechaIngreso:'2024-01-15',fechaNacimiento:'1995-06-06',cita:'Yo no bebo, solo cata',foto:null,imagenReverso:null},
+{id:gid(),numeroSocio:'BT-002',nombre:'Carlos Villanueva',sexo:'Si Por Favor',especialidad:'Catador Oficial',apodo:'El Catador',domicilio:'Av. Borachos #23',estadoCivil:'Complicado',debilidad:'La cerveza',estado:'Activo',fechaIngreso:'2024-02-20',fechaNacimiento:'1998-07-10',cita:'Todo es mejor con tekila',foto:null,imagenReverso:null},
+{id:gid(),numeroSocio:'BT-003',nombre:'Maria Fernanda Lopez',sexo:'Dama de Honor',especialidad:'Paz Social',apodo:'La Reina',domicilio:'Pasaje del Bar #7',estadoCivil:'Soltera',debilidad:'El karaoke',estado:'Activo',fechaIngreso:'2024-03-10',fechaNacimiento:'2000-12-05',cita:'La vida es corta para mal vino',foto:null,imagenReverso:null},
+{id:gid(),numeroSocio:'BT-004',nombre:'Roberto Castillo',sexo:'Macho Alfa',especialidad:'Filosofo del Bar',apodo:'El Filosofo',domicilio:'Calle Madrugada #99',estadoCivil:'En relacion toxica',debilidad:'Las rubias',estado:'En Rehabilitación',fechaIngreso:'2024-04-05',fechaNacimiento:'1993-09-18',cita:'El que no arriesga no toma',foto:null,imagenReverso:null},
+{id:gid(),numeroSocio:'BT-005',nombre:'Andrea Gutierrez',sexo:'Todos los Dias',especialidad:'Animador Oficial',apodo:'La Animadora',domicilio:'Plaza Tekila #3',estadoCivil:'Libre como el viento',debilidad:'La danza',estado:'Activo',fechaIngreso:'2024-05-12',fechaNacimiento:'1997-01-30',cita:'Hoy se bebe, manana tambien',foto:null,imagenReverso:null},
+{id:gid(),numeroSocio:'BT-006',nombre:'Diego Morales',sexo:'Por Favor',especialidad:'Sobreviviente',apodo:'El Sobreviviente',domicilio:'Calle Resaca #50',estadoCivil:'Divorciado',debilidad:'El picante',estado:'Probation',fechaIngreso:'2024-06-01',fechaNacimiento:'1996-05-14',cita:'Sobrevivi al domingo',foto:null,imagenReverso:null}
+];events=[
+{id:gid(),titulo:'Noche de Tekila Inaugural',fecha:'2025-07-20',descripcion:'La primera gran noche del grupo con seleccion de tekilas artesanales.',imagen:null},
+{id:gid(),titulo:'Cena de Gala Bar Tekila',fecha:'2025-08-15',descripcion:'Cena elegante con maridaje de tekilas premium.',imagen:null}
+];saveLocal()}renderAll()}},3000);document.addEventListener('keydown',e=>{if(e.key==='Escape')['m','e','crop','carnet','del'].forEach(n=>closeML(n))});['m','e','crop','carnet','del'].forEach(n=>{document.getElementById('ml-'+n).addEventListener('click',function(e){if(e.target===this)closeML(n)})})}
 document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
